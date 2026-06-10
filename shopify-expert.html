@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Expert Shopify IA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --p:#7F77DD;--pd:#534AB7;--pl:#EEEDFE;--pt:#3C3489;
+  --ok:#1D9E75;--okl:#E1F5EE;--err:#E24B4A;--errl:#FCEAEA;
+  --s0:#fff;--s1:#f7f7fb;--s2:#eeeef4;--s3:#e4e4ed;
+  --b:rgba(0,0,0,0.07);--bs:rgba(0,0,0,0.13);
+  --t1:#0f0f18;--t2:#5c5c72;--t3:#9898b0;
+  --r1:8px;--r2:14px;--r3:20px;--r4:999px
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#131320;--s1:#1a1a28;--s2:#222232;--s3:#2c2c40;
+  --b:rgba(255,255,255,0.07);--bs:rgba(255,255,255,0.13);
+  --t1:#eeeef8;--t2:#8888a8;--t3:#55556e;
+  --pl:#1e1b42;--pt:#b0aaf8;--okl:#0c2218;--errl:#2a1010
+}}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--s1);color:var(--t1);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px 12px 40px}
+.wrap{width:100%;max-width:860px;background:var(--s0);border-radius:var(--r2);border:1px solid var(--b);overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+
+/* HEADER */
+.hdr{padding:14px 20px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--s0)}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hdr-title{font-size:15px;font-weight:600;color:var(--t1)}
+.hdr-sub{font-size:11px;color:var(--t2);margin-top:1px}
+.api-zone{display:flex;align-items:center;gap:8px;background:var(--s1);padding:6px 12px;border-radius:var(--r4);border:1px solid var(--b)}
+.key-dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0;transition:.3s}
+.key-dot.on{background:var(--ok)}
+.key-lbl{font-size:11px;color:var(--t2);white-space:nowrap}
+.key-btn{background:none;border:none;font-size:11px;color:var(--p);cursor:pointer;font-weight:600;padding:2px 6px;border-radius:var(--r4);transition:.15s}
+.key-btn:hover{background:var(--pl)}
+
+/* KEY INPUT */
+.key-input-row{display:none;padding:10px 20px;background:var(--s1);border-bottom:1px solid var(--b);gap:8px;align-items:center}
+.key-input-row.show{display:flex}
+.key-input-row input{flex:1;border:1px solid var(--b);border-radius:var(--r1);padding:8px 12px;font-size:13px;background:var(--s0);color:var(--t1);outline:none;font-family:inherit}
+.key-input-row input:focus{border-color:var(--p)}
+.key-save{background:var(--p);color:#fff;border:none;border-radius:var(--r1);padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.key-save:hover{background:var(--pd)}
+.key-clear{background:none;border:1px solid var(--b);border-radius:var(--r1);padding:8px 12px;font-size:12px;color:var(--t2);cursor:pointer}
+
+/* PILLS */
+.pills-wrap{padding:10px 16px 0;border-bottom:1px solid var(--b);background:var(--s0)}
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{background:var(--s2);border:1px solid var(--b);padding:5px 14px;border-radius:var(--r4);font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
+.pill:hover{border-color:var(--p);color:var(--p)}
+.pill.on{background:var(--pl);border:1.5px solid var(--p);color:var(--pt)}
+
+/* CHAT */
+.chat{padding:16px;min-height:360px;max-height:460px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background:var(--s0)}
+.chat::-webkit-scrollbar{width:4px}
+.chat::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px}
+.msg{display:flex;gap:8px;animation:fi .18s ease}
+.msg.u{flex-direction:row-reverse}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.av.ai{background:var(--pl);color:var(--p)}
+.av.u{background:var(--p);color:#fff}
+.bbl{max-width:88%;padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.6;position:relative;word-break:break-word}
+.msg:not(.u) .bbl{background:var(--s1);border:1px solid var(--b);border-top-left-radius:4px}
+.msg.u .bbl{background:var(--p);color:#fff;border-bottom-right-radius:4px}
+.bbl strong{font-weight:600}
+.bbl code{background:var(--s2);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace}
+.msg.u .bbl code{background:rgba(255,255,255,0.2)}
+.bbl .li{display:flex;gap:6px;margin:3px 0}
+.bbl .li .dot-li{color:var(--p);flex-shrink:0;font-weight:700}
+.msg.u .bbl .dot-li{color:rgba(255,255,255,0.8)}
+.bbl h3{font-size:13px;font-weight:700;margin:8px 0 3px}
+.bbl h4{font-size:12.5px;font-weight:600;margin:6px 0 2px}
+.copy-btn{position:absolute;top:6px;right:8px;background:none;border:none;font-size:11px;color:var(--t3);cursor:pointer;opacity:0;transition:.15s;padding:2px 4px;border-radius:4px}
+.bbl:hover .copy-btn{opacity:1}
+.copy-btn:hover{background:var(--s2);color:var(--t1)}
+.dots-wrap{display:flex;gap:5px;align-items:center;padding:4px 0}
+.dots-wrap span{width:7px;height:7px;background:var(--p);border-radius:50%;animation:pulse 1.1s infinite}
+.dots-wrap span:nth-child(2){animation-delay:.18s}
+.dots-wrap span:nth-child(3){animation-delay:.36s}
+@keyframes pulse{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+
+/* QUESTIONS */
+.qs-zone{padding:10px 16px 12px;border-top:1px solid var(--b);background:var(--s0)}
+.qs-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.qs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.qcard{background:var(--s1);border:1px solid var(--b);border-radius:var(--r1);padding:8px 12px;cursor:pointer;transition:.15s}
+.qcard:hover{border-color:var(--p);background:var(--pl)}
+.qcard:hover .qcard-t{color:var(--pt)}
+.qcard-t{font-size:12px;font-weight:600;color:var(--t1);transition:.15s}
+.qcard-s{font-size:10.5px;color:var(--t3);margin-top:1px}
+
+/* INPUT */
+.inp-zone{padding:12px 16px 14px;border-top:1px solid var(--b);background:var(--s0)}
+.inp-row{display:flex;gap:8px;align-items:flex-end}
+textarea{flex:1;background:var(--s1);border:1px solid var(--b);border-radius:var(--r3);padding:10px 16px;font-size:13.5px;font-family:inherit;resize:none;min-height:42px;max-height:120px;color:var(--t1);outline:none;transition:.15s;line-height:1.5}
+textarea:focus{border-color:var(--p)}
+textarea::placeholder{color:var(--t3)}
+.send-btn{background:var(--p);color:#fff;border:none;border-radius:var(--r4);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;height:42px;flex-shrink:0;display:flex;align-items:center;gap:5px;transition:.15s}
+.send-btn:hover:not(:disabled){background:var(--pd)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.bottom-row{display:flex;justify-content:flex-end;margin-top:6px}
+.clr-btn{background:none;border:none;font-size:11px;color:var(--t3);cursor:pointer;text-decoration:underline;transition:.15s}
+.clr-btn:hover{color:var(--err)}
+
+/* ERR BANNER */
+.err-banner{background:var(--errl);border-left:3px solid var(--err);border-radius:var(--r1);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12.5px;color:var(--err)}
+.retry-btn{background:var(--p);color:#fff;border:none;border-radius:var(--r4);padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+
+@media(max-width:540px){
+  body{padding:8px 6px 32px}
+  .qs-grid{grid-template-columns:1fr}
+  .bbl{max-width:96%;font-size:13px}
+  .hdr{padding:10px 14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="logo">🛍️</div>
+      <div>
+        <div class="hdr-title">Expert Shopify IA</div>
+        <div class="hdr-sub">20 ans d'expérience · Stratégie · Ads · Scale · Finance</div>
+      </div>
+    </div>
+    <div class="api-zone">
+      <div class="key-dot" id="kDot"></div>
+      <span class="key-lbl" id="kLbl">Clé API</span>
+      <button class="key-btn" id="kToggle">Configurer</button>
+    </div>
+  </div>
+
+  <!-- KEY INPUT ROW -->
+  <div class="key-input-row" id="keyRow">
+    <input type="password" id="keyInp" placeholder="sk-ant-api03-..." autocomplete="off">
+    <button class="key-save" id="kSave">Sauvegarder</button>
+    <button class="key-clear" id="kClear">Effacer</button>
+  </div>
+
+  <!-- PILLS -->
+  <div class="pills-wrap">
+    <div class="pills" id="pills"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat" id="chat"></div>
+
+  <!-- QUESTIONS RAPIDES -->
+  <div class="qs-zone">
+    <div class="qs-lbl" id="qsLbl">Questions rapides — Tout</div>
+    <div class="qs-grid" id="qsGrid"></div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="inp-zone">
+    <div class="inp-row">
+      <textarea id="inp" rows="1" placeholder="Posez votre question Shopify... (Entrée = envoyer)"></textarea>
+      <button class="send-btn" id="sendBtn">Envoyer <span>→</span></button>
+    </div>
+    <div class="bottom-row">
+      <button class="clr-btn" id="clrConv">Effacer la conversation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SYSTEM = `Tu es le meilleur expert Shopify et e-commerce au monde, avec 20 ans d'expérience réelle. Tu as accompagné des centaines de boutiques de 0 à 7 et 8 chiffres de chiffre d'affaires. Tu parles TOUJOURS en français. Tu es direct, honnête, sans blabla inutile. Tu donnes des réponses structurées, actionnables immédiatement, avec des chiffres réels, des noms d'outils précis (avec leurs prix), des exemples concrets, et tu alertes sur les erreurs courantes et les arnaques du secteur. Tu adaptes ton niveau au contexte (débutant / avancé). Pas de "Bien sûr !" ni "Excellente question !". Max 3 emojis par réponse.
+
+[LANCEMENT & STRATÉGIE]
+- Niche : Google Trends, Exploding Topics, TikTok, Amazon Movers & Shakers
+- Business models : dropshipping, private label, POD, wholesale, digital products
+- Shopify : Dawn (gratuit), Impulse (380$), Debutify — apps essentielles
+- Budget : dropshipping 500-1500€, private label 3000-10000€
+- Checklist : domaine, logo, pages légales, retour 14j, pixels tracking
+
+[PRODUCT RESEARCH]
+- Outils : Minea (49€/mois), Adspy (149$/mois), Pipiads (77$/mois), TikTok/FB Ads Library (gratuit)
+- Critères : WOW factor, marge >50%, marché >500M€, transportable, peu de marques dominantes
+- Validation rapide : test 3-5j, budget 50-150€, CPC cible <1€
+- Top niches 2025-2026 : santé/compléments (+1075% YoY), K-beauty, animaux, accessoires téléphone, athleisure
+- Passage private label : dès 50-100 ventes/mois
+
+[META ADS]
+- Structure : CBO au scaling, ABO au test (10-20€/ad set, 3-5 ad sets, 2-3 créatives)
+- Audiences : intérêts larges 500k-5M, Lookalike 1% acheteurs, retargeting 7j/14j panier
+- KPIs FR : ROAS >2.5x, CPC <0.80€, CTR >2%, CPM <15€
+- Créatives : UGC natif, hook 0-3s, ratio 4:5 ou 9:16, sous-titres obligatoires
+- Scaling : +20% budget max/48h, dupliquer gagnants, tester créatives en continu
+- Budget démarrage : 30-50€/jour minimum
+- iOS14+ : API Conversions côté serveur
+
+[TIKTOK ADS]
+- CPM <15€, Spark Ads = meilleur CTR, 15-30s vertical 9:16, natif > léché
+- Budget : 20€/jour min par ad group, KPIs : CPC <0.50€, CTR >1.5%
+
+[GOOGLE ADS]
+- Shopping Standard : CPC 0.30-0.80€, Google Merchant Center requis
+- Performance Max : ROAS cible 3-4x
+- Shopping gratuit : activer "Surfaces Across Google"
+
+[SEO]
+- On-page : title 50-60 car, meta 150-160 car, H1 unique, schema Product, alt tags
+- Technique : vitesse <2.5s LCP, Core Web Vitals, sitemap auto, lazy loading
+- Blog : guides d'achat, comparatifs, longue traîne 100-1000 req/mois
+- Outils : Search Console (gratuit), Semrush (120€/mois), Ahrefs (99$/mois)
+- Timeline : 3-6 mois premiers résultats, 6-12 mois trafic significatif
+
+[EMAIL MARKETING]
+- Klaviyo : gratuit <250 contacts, ~30-70€/mois ensuite
+- 6 flows : Welcome (5 emails/7j), Abandoned Cart (3 emails/1h-24h-72h — récupère 5-15%), Post-Purchase, Browse Abandon (4h), Winback (J60/90/120), Birthday (-15%)
+- Pop-up : -10-15% exit intent, 5-10s
+- KPIs : open rate >25%, CTR >2%, objectif 20-30% du CA
+
+[FOURNISSEURS]
+- Alibaba : Verified Supplier + Trade Assurance, 3-5 échantillons avant commande
+- Agents : CJdropshipping (gratuit), Zendrop (50$/mois), Spocket (39$/mois EU/US)
+- Négociation : demander 3x le volume, 30% avant / 70% avant expédition
+- Délais FR : standard 10-20j, express 5-10j, EU 3-7j
+- POD : Printful/Printify, marge 35-45%, zéro stock
+- CE obligatoire : électronique, jouets, cosmétiques
+
+[BRANDING & CRÉATIF]
+- Logo : Looka (20-65$), Fiverr (20-50$) — mémorable, .com disponible
+- UGC : Billo (dès 50$/vidéo), JoinBrands, micro-influenceurs <10k
+- Vidéo : hook 0-3s → agitation 3-8s → solution 8-20s → preuve 20-25s → CTA 25-30s
+- Photos pro à 0€ : fond blanc, lumière naturelle, iPhone, Remove.bg, Canva
+
+[CRO]
+- Benchmarks : 1-2% moyen, 2-3% bon, 3-5%+ excellent
+- Page produit : 5-8 visuels, prix barré, badges confiance, bullets bénéfices, urgence, 20+ avis avec photos, FAQ 5-7q, garantie 30j (+15% conversion)
+- Apps upsell : ReConvert (49$/mois), AfterSell
+- Heatmaps : Hotjar (gratuit 35 sessions/j), Microsoft Clarity (100% gratuit)
+- A/B : Shopify Experiments (natif)
+
+[FINANCE]
+- Coûts type : COGS 25-35%, pub 20-35%, Shopify+payment 3-4%, apps 2-5% — marge nette 10-20% (bon), 20-30%+ (excellent)
+- Break-even ROAS = 1 / marge brute (marge 40% → ROAS BE = 2.5)
+- Statuts : auto-entrepreneur (limite 188k€, charges ~22%), SASU (dès 5-10k€/mois net)
+- TVA : franchise <91900€, OSS dès 10000€ ventes intra-UE
+- Outils : A2X (19$/mois), Pennylane, Qonto/Shine
+
+[LÉGAL]
+- Mentions légales : nom, adresse, SIRET, RCS, hébergeur — obligatoires
+- CGV : rétractation 14j, garantie 2 ans, prix TTC, délais livraison
+- RGPD : Cookiebot ou Axeptio (~8€/mois), consentement explicite
+- Marque INPI : 250€ / 10 ans / 1 classe — priorité dès 1000€/mois CA
+- Chargebacks : conserver preuves tracking, max 1% Visa / 0.65% Amex
+
+[SCALING 6→7→8 CHIFFRES]
+- 0-10k€/mois : 1 produit, 1 canal, faire soi-même
+- 10-100k€/mois : private label, 2ème canal, VA Philippines (600-800$/mois), Gorgias SAV
+- 100k-1M€+ : media buyer freelance (1500-3000€/mois), ops manager, SOPs Notion, Zapier
+- KPIs sains : conversion >2%, ROAS blended >2x, LTV >3x CAC, retours <10%
+- Exit : 2-4x EBITDA annuel, Empire Flippers, Acquire.com`;
+
+const THEMES = {
+  "Tout":[
+    {t:"Plan complet 0 → 1M€",s:"Roadmap de lancement à scaling"},
+    {t:"Budget minimal pour démarrer",s:"Dropshipping ou Private Label"},
+    {t:"Top niches rentables 2025",s:"Où il reste de l'argent"},
+    {t:"Structure Meta Ads rentable",s:"Campagne de A à Z"},
+    {t:"Calculer sa marge nette réelle",s:"Tous les coûts cachés"},
+    {t:"Passer à 100k€/mois",s:"Plan de scaling concret"},
+    {t:"SASU vs auto-entrepreneur",s:"Quel statut choisir"},
+    {t:"Klaviyo setup complet",s:"Flows email qui convertissent"}
+  ],
+  "Lancer":[
+    {t:"Checklist boutique parfaite",s:"De zéro à la 1ère vente"},
+    {t:"Comment valider ma niche",s:"Méthode en 48h"},
+    {t:"Shopify : quel plan choisir",s:"Basic vs Shopify vs Advanced"},
+    {t:"Apps Shopify indispensables",s:"Les 10 apps à installer dès J1"},
+    {t:"Dropshipping vs Private Label",s:"Quel business model pour moi"},
+    {t:"Thème gratuit vs payant",s:"Dawn vs Impulse vs Debutify"}
+  ],
+  "Produit":[
+    {t:"Trouver un winning product",s:"Méthode step-by-step"},
+    {t:"Minea vs Adspy vs Pipiads",s:"Quel outil utiliser en 2025"},
+    {t:"Critères d'un produit gagnant",s:"Checklist des 7 critères"},
+    {t:"Niches rentables en 2025",s:"Données et tendances réelles"},
+    {t:"Valider un produit à 50€",s:"Test rapide sans risque"},
+    {t:"Passer au private label",s:"Quand et comment faire"}
+  ],
+  "Ads":[
+    {t:"Structure Meta Ads complète",s:"CBO, ABO, audiences, budget"},
+    {t:"Budget Facebook pour démarrer",s:"Minimum et répartition"},
+    {t:"Lire ses métriques Ads",s:"ROAS, CPC, CTR, CPA — cibles FR"},
+    {t:"TikTok Ads vs Meta Ads 2025",s:"Lequel choisir selon sa niche"},
+    {t:"Créer des UGC qui convertissent",s:"Brief, hook, structure vidéo"},
+    {t:"Règles de scaling gagnant",s:"Comment monter le budget sans tout casser"}
+  ],
+  "SEO":[
+    {t:"SEO Shopify pour débutant",s:"Par où commencer"},
+    {t:"Fiche produit optimisée SEO",s:"Template et structure complète"},
+    {t:"Stratégie blog e-commerce",s:"Contenu qui génère du trafic gratuit"},
+    {t:"Google Shopping gratuit",s:"Comment apparaître sans payer"},
+    {t:"Vitesse et Core Web Vitals",s:"Optimisation Shopify étape par étape"},
+    {t:"Link building pour boutique",s:"Stratégie backlinks e-commerce"}
+  ],
+  "Email":[
+    {t:"6 flows Klaviyo essentiels",s:"Setup complet de A à Z"},
+    {t:"Construire sa liste email",s:"Pop-up, lead magnet, stratégie"},
+    {t:"Séquence panier abandonné",s:"3 emails qui récupèrent 5-15%"},
+    {t:"Subject lines open rate 30%+",s:"Formules et exemples qui marchent"},
+    {t:"Segmentation VIP / at-risk",s:"Klaviyo avancé"},
+    {t:"Email = 25% du CA",s:"Comment y arriver concrètement"}
+  ],
+  "Scale":[
+    {t:"De 10k à 100k€/mois",s:"Plan d'action mois par mois"},
+    {t:"Recruter son premier VA",s:"Où, comment, combien payer"},
+    {t:"Automatiser son SAV",s:"Gorgias + macros + IA"},
+    {t:"Dashboard KPIs 7 chiffres",s:"Ce qu'on mesure chaque semaine"},
+    {t:"Diversifier ses canaux",s:"Ne plus dépendre uniquement des ads"},
+    {t:"Valoriser et vendre sa boutique",s:"Exit, Empire Flippers, multiples"}
+  ],
+  "Finance":[
+    {t:"Calculer sa marge nette réelle",s:"Tous les coûts que tu oublies"},
+    {t:"Cash flow e-commerce",s:"Anticiper les problèmes de trésorerie"},
+    {t:"SASU vs auto-entrepreneur",s:"Quel statut selon ton CA"},
+    {t:"TVA et ventes en Europe",s:"OSS, règles, erreurs à éviter"},
+    {t:"A2X et Pennylane setup",s:"Comptabilité automatisée Shopify"},
+    {t:"Financer son premier stock",s:"Options sans se ruiner"}
+  ],
+  "Légal":[
+    {t:"Mentions légales obligatoires",s:"Ce que la loi impose en France"},
+    {t:"CGV conformes droit français",s:"Points clés et erreurs courantes"},
+    {t:"RGPD pour boutique Shopify",s:"Cookies, consentement, CNIL"},
+    {t:"Déposer sa marque à l'INPI",s:"Procédure, coût, délai"},
+    {t:"Dropshipping et responsabilité",s:"Ce que tu risques vraiment"},
+    {t:"Gérer les chargebacks",s:"Prévention et contestation gagnante"}
+  ],
+  "CRO":[
+    {t:"Page produit qui convertit à 3%+",s:"Anatomie complète"},
+    {t:"Réduire les abandons panier",s:"Tactiques immédiates"},
+    {t:"Checkout optimisé et upsells",s:"One-page, Shop Pay, ReConvert"},
+    {t:"A/B tester sur Shopify",s:"Outils et méthode en 2025"},
+    {t:"Hotjar et Clarity : lire les data",s:"Sessions, heatmaps, insights"},
+    {t:"Landing page dédiée produit",s:"Quand et comment en créer une"}
+  ],
+  "Fournisseur":[
+    {t:"Trouver un fournisseur Alibaba",s:"Méthode et pièges à éviter"},
+    {t:"Négocier prix et MOQ",s:"Scripts de négociation qui marchent"},
+    {t:"Agent sourcing Chine",s:"Pourquoi en avoir un et comment"},
+    {t:"CJ vs Zendrop vs Spocket",s:"Comparatif complet 2025"},
+    {t:"Checklist commande d'échantillons",s:"Ce qu'il faut vérifier"},
+    {t:"Délais livraison acceptables",s:"Standards et gestion des attentes clients"}
+  ],
+  "Branding":[
+    {t:"Créer une marque mémorable",s:"Identité visuelle complète"},
+    {t:"Obtenir du UGC rapidement",s:"Brief, plateformes, tarifs"},
+    {t:"Storytelling de marque",s:"Angle émotionnel qui vend"},
+    {t:"Vidéo produit qui cartonne",s:"Structure hook — AIDA en 30s"},
+    {t:"Photos produit pro à 0€",s:"Sans studio, avec ton téléphone"},
+    {t:"Plateformes UGC et créateurs",s:"Billo, JoinBrands, micro-influenceurs"}
+  ]
+};
+
+const KEYS=Object.keys(THEMES);
+let active="Tout",hist=[],loading=false;
+let apiKey=localStorage.getItem("sxk")||"";
+
+const $=id=>document.getElementById(id);
+const chat=$("chat"),pills=$("pills"),grid=$("qsGrid"),inp=$("inp"),
+      sendBtn=$("sendBtn"),kDot=$("kDot"),kLbl=$("kLbl"),
+      kToggle=$("kToggle"),keyRow=$("keyRow"),keyInp=$("keyInp"),
+      kSave=$("kSave"),kClear=$("kClear"),qsLbl=$("qsLbl");
+
+function updKey(){
+  const ok=apiKey&&apiKey.startsWith("sk-ant-");
+  kDot.className="key-dot"+(ok?" on":"");
+  kLbl.textContent=ok?"Clé active":"Clé absente";
+}
+
+kToggle.onclick=()=>{
+  keyRow.classList.toggle("show");
+  if(keyRow.classList.contains("show")&&apiKey)keyInp.value=apiKey;
+};
+kSave.onclick=()=>{
+  const v=keyInp.value.trim();
+  if(v.startsWith("sk-ant-")){apiKey=v;localStorage.setItem("sxk",v);updKey();keyRow.classList.remove("show");}
+  else alert("Clé invalide — doit commencer par sk-ant-");
+};
+kClear.onclick=()=>{apiKey="";localStorage.removeItem("sxk");keyInp.value="";updKey();};
+
+function md(t){
+  if(!t)return"";
+  let n=0;
+  return t
+    .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g,"<em>$1</em>")
+    .replace(/`(.*?)`/g,'<code>$1</code>')
+    .replace(/^### (.+)$/gm,"<h4>$1</h4>")
+    .replace(/^## (.+)$/gm,"<h3>$1</h3>")
+    .replace(/^- (.+)$/gm,'<div class="li"><span class="dot-li">•</span><span>$1</span></div>')
+    .replace(/^\d+\. (.+)$/gm,(_,c)=>`<div class="li"><span class="dot-li">${++n}.</span><span>${c}</span></div>`)
+    .replace(/\n\n/g,"<br><br>")
+    .replace(/\n/g,"<br>");
+}
+
+function addMsg(role,content,err=false){
+  const isU=role==="user";
+  const d=document.createElement("div");
+  d.className="msg"+(isU?" u":"");
+  if(err){
+    d.innerHTML=`<div class="av ai">S</div><div class="err-banner">${content}<button class="retry-btn" onclick="retry()">Réessayer</button></div>`;
+  }else{
+    const bbl=`<div class="bbl">${isU?content:md(content)}${!isU?'<button class="copy-btn" title="Copier">📋</button>':''}</div>`;
+    d.innerHTML=`<div class="av ${isU?"u":"ai"}">${isU?"Moi":"S"}</div>${bbl}`;
+    if(!isU){
+      d.querySelector(".copy-btn").onclick=function(){
+        navigator.clipboard.writeText(content);
+        this.textContent="✅";setTimeout(()=>this.textContent="📋",1200);
+      };
+    }
+  }
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+  return d;
+}
+
+function addLoading(){
+  const d=document.createElement("div");
+  d.className="msg";d.id="ld";
+  d.innerHTML=`<div class="av ai">S</div><div class="bbl"><div class="dots-wrap"><span></span><span></span><span></span></div></div>`;
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+}
+function rmLoading(){const e=$("ld");if(e)e.remove();}
+
+let lastQ="";
+function retry(){sendMessage(lastQ);}
+
+async function sendMessage(txt){
+  txt=txt||inp.value.trim();
+  if(!txt||loading)return;
+  if(!apiKey||!apiKey.startsWith("sk-ant-")){
+    addMsg("ai","🔑 Clé API manquante. Clique sur Configurer en haut et entre ta clé Anthropic (sk-ant-...).",true);return;
+  }
+  lastQ=txt;
+  loading=true;sendBtn.disabled=true;inp.disabled=true;
+  addMsg("user",txt);
+  inp.value="";inp.style.height="auto";
+  hist.push({role:"user",content:txt});
+  if(hist.length>20)hist=hist.slice(-20);
+
+  addLoading();
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(),30000);
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":apiKey,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:2048,
+        system:SYSTEM,
+        messages:hist
+      }),
+      signal:ctrl.signal
+    });
+    clearTimeout(tid);
+    if(!r.ok){
+      if(r.status===401)throw new Error("Clé API invalide (401). Vérifie ta clé Anthropic.");
+      if(r.status===429)throw new Error("Trop de requêtes (429). Attends quelques secondes.");
+      throw new Error(`Erreur API ${r.status}. Réessaye.`);
+    }
+    const d=await r.json();
+    const reply=d.content?.[0]?.text||"Pas de réponse.";
+    hist.push({role:"assistant",content:reply});
+    rmLoading();addMsg("ai",reply);
+  }catch(e){
+    clearTimeout(tid);rmLoading();
+    const msg=e.name==="AbortError"?"Délai dépassé (30s). Réessaye.":e.message||"Erreur réseau.";
+    addMsg("ai",msg,true);
+    hist.pop();
+  }finally{
+    loading=false;sendBtn.disabled=false;inp.disabled=false;inp.focus();
+  }
+}
+
+function renderPills(){
+  pills.innerHTML="";
+  KEYS.forEach(k=>{
+    const p=document.createElement("div");
+    p.className="pill"+(k===active?" on":"");
+    p.textContent=k;
+    p.onclick=()=>{active=k;renderPills();renderQs();};
+    pills.appendChild(p);
+  });
+}
+
+function renderQs(){
+  const qs=THEMES[active];
+  qsLbl.textContent=`Questions rapides — ${active}`;
+  grid.innerHTML="";
+  qs.forEach(q=>{
+    const c=document.createElement("div");
+    c.className="qcard";
+    c.innerHTML=`<div class="qcard-t">${q.t}</div><div class="qcard-s">${q.s}</div>`;
+    c.onclick=()=>sendMessage(q.t);
+    grid.appendChild(c);
+  });
+}
+
+sendBtn.onclick=()=>sendMessage();
+inp.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
+});
+inp.addEventListener("input",function(){
+  this.style.height="auto";
+  this.style.height=Math.min(120,Math.max(42,this.scrollHeight))+"px";
+});
+$("clrConv").onclick=()=>{hist=[];chat.innerHTML="";welcome();};
+
+function welcome(){
+  addMsg("ai","🎯 **Expert Shopify IA — Tout-en-un**\n\nJe maîtrise l'intégralité du cycle e-commerce :\n\n🚀 **Lancement** — niche, boutique, positionnement\n🔍 **Produit** — research Minea/Adspy, validation rapide\n📣 **Ads** — Meta, TikTok, Google (ROAS, scaling)\n📈 **SEO** — organique, blog, fiches produits\n📧 **Email** — Klaviyo flows, segmentation\n📦 **Fournisseur** — Alibaba, négociation, agents\n🎨 **Branding** — UGC, storytelling, vidéo\n🔬 **CRO** — conversion 3%+, A/B tests\n💰 **Finance** — marges, TVA, SASU\n⚖️ **Légal** — CGV, RGPD, INPI\n📊 **Scale** — 6→7→8 chiffres\n\nChoisissez un thème ou posez votre question. 💬");
+}
+
+updKey();renderPills();renderQs();welcome();
+</script>
+</body>
+</html>

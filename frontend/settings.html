@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres — Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}.glass{background:rgba(15,23,42,.85);backdrop-filter:blur(12px)}</style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen" x-data="settingsApp()" x-init="init()">
+
+<nav class="glass border-b border-slate-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white text-xs">A</div>
+            <span class="font-extrabold text-white text-sm uppercase">Sunu <span class="text-indigo-500">Gestion</span></span>
+        </a>
+        <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition font-bold">Retour</a>
+    </div>
+</nav>
+
+<main class="max-w-4xl mx-auto px-4 py-12">
+    <div class="mb-12">
+        <h1 class="text-4xl font-extrabold text-white">Paramètres de l'entreprise</h1>
+        <p class="text-slate-500 mt-2">Configurez vos informations et vos méthodes de paiement pour vos clients.</p>
+    </div>
+
+    <form @submit.prevent="save()" class="space-y-8">
+        <!-- Infos Générales -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+            <h2 class="text-xl font-bold text-white mb-6">Informations Générales</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Nom de l'entreprise</label>
+                    <input type="text" x-model="form.name" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Email de contact</label>
+                    <input type="email" x-model="form.email" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Téléphone</label>
+                    <input type="text" x-model="form.phone" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Site Web</label>
+                    <input type="text" x-model="form.website" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+            </div>
+        </div>
+
+        <!-- Paiement Vitrine -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-white mb-2">Paiement pour vos clients</h2>
+                <p class="text-slate-500 text-sm">Ces informations s'afficheront à vos clients lors de leurs commandes sur votre boutique en ligne.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Numéro Wave de l'entreprise</label>
+                    <input type="text" x-model="form.wave_number" placeholder="Ex: +221 77 856 16 30" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Numéro Orange Money</label>
+                    <input type="text" x-model="form.om_number" placeholder="Ex: +221 78 123 45 67" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2">Coordonnées Bancaires / IBAN</label>
+                <input type="text" x-model="form.bank_iban" placeholder="Ex: SN012 08201 002134567890 45" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2">Instructions Additionnelles (facultatif)</label>
+                <textarea x-model="form.payment_info" rows="3" placeholder="Ex: Envoyez la capture d'écran une fois le transfert effectué." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition"></textarea>
+            </div>
+
+            <!-- CinetPay API Keys Integration -->
+            <div class="border-t border-slate-800 pt-6">
+                <h3 class="text-lg font-bold text-white mb-2">Passerelle CinetPay (Paiement automatique)</h3>
+                <p class="text-slate-500 text-xs mb-4">Permet d'encaisser automatiquement par Wave, Orange Money et Carte Bancaire. Laissez vide pour utiliser uniquement les paiements manuels avec capture d'écran.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">CinetPay API Key</label>
+                        <input type="password" x-model="form.cinetpay_api_key" placeholder="Saisir votre API Key" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">CinetPay Site ID</label>
+                        <input type="text" x-model="form.cinetpay_site_id" placeholder="Saisir votre Site ID" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PayTech API Keys Integration -->
+            <div class="border-t border-slate-800 pt-6">
+                <h3 class="text-lg font-bold text-white mb-2">Passerelle PayTech (Paiement automatique sénégalais)</h3>
+                <p class="text-slate-500 text-xs mb-4">Permet d'encaisser automatiquement par Wave, Orange Money, Free Money et Carte Bancaire au Sénégal. Créez un compte sur <a href="https://paytech.sn" target="_blank" class="text-indigo-500 underline">paytech.sn</a> pour obtenir vos clés de test ou live.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">PayTech API Key (Clé API)</label>
+                        <input type="password" x-model="form.paytech_api_key" placeholder="Saisir votre API Key" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">PayTech API Secret (Clé Secrète)</label>
+                        <input type="password" x-model="form.paytech_api_secret" placeholder="Saisir votre API Secret" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CJDropshipping Integration -->
+            <div class="border-t border-slate-800 pt-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-sm" style="background:#e84b2a">CJ</div>
+                    <h3 class="text-lg font-bold text-white">CJDropshipping</h3>
+                    <span x-show="cj.connected" class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">● CONNECTÉ</span>
+                    <span x-show="!cj.connected" class="text-[10px] font-black text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">○ NON CONNECTÉ</span>
+                </div>
+                <p class="text-slate-500 text-xs mb-4">Connectez votre compte CJDropshipping pour passer des commandes automatiquement sans stock. Votre fournisseur expédie directement chez vos clients.</p>
+
+                <div x-show="!cj.connected" class="grid gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Email CJDropshipping</label>
+                        <input type="email" x-model="cj.email" placeholder="aliounebadaraibnabutalibdiene@gmail.com" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-red-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Access Token CJ <span class="text-slate-500">(trouvé dans Mon Compte → API sur cjdropshipping.com)</span></label>
+                        <input type="text" x-model="cj.access_token" placeholder="90dc7488706e4082a166e86e4810f3f0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-red-500 transition font-mono text-sm">
+                    </div>
+                    <button @click="connectCJ()" :disabled="cj.loading" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
+                        <span x-show="!cj.loading">🔗 Connecter CJDropshipping</span>
+                        <span x-show="cj.loading">Connexion en cours…</span>
+                    </button>
+                </div>
+
+                <div x-show="cj.connected" class="flex flex-wrap gap-2 mb-3">
+                    <span class="text-xs text-slate-400">Compte : <span class="text-white" x-text="cj.email"></span></span>
+                    <button @click="disconnectCJ()" class="ml-auto text-xs text-red-400 hover:text-red-300 underline">Déconnecter</button>
+                </div>
+
+                <p x-show="cj.message" :class="cj.error ? 'text-red-400' : 'text-emerald-400'" class="text-xs mt-1" x-text="cj.message"></p>
+            </div>
+
+            <!-- Jumia Marketplace Integration -->
+            <div class="border-t border-slate-800 pt-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background:#f77f00">🛒</div>
+                    <h3 class="text-lg font-bold text-white">Jumia Marketplace</h3>
+                    <span x-show="jumia.connected" class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">● CONNECTÉ</span>
+                    <span x-show="!jumia.connected" class="text-[10px] font-black text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">○ NON CONNECTÉ</span>
+                </div>
+                <p class="text-slate-500 text-xs mb-4">Recevez automatiquement vos commandes Jumia dans SunuGestion et exportez vos produits vers Jumia en un clic.</p>
+
+                <div x-show="!jumia.connected" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Pays</label>
+                        <select x-model="jumia.country" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="sn">🇸🇳 Sénégal</option>
+                            <option value="ci">🇨🇮 Côte d'Ivoire</option>
+                            <option value="ng">🇳🇬 Nigeria</option>
+                            <option value="ke">🇰🇪 Kenya</option>
+                            <option value="ma">🇲🇦 Maroc</option>
+                            <option value="gh">🇬🇭 Ghana</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">User ID Jumia</label>
+                        <input type="text" x-model="jumia.user_id" placeholder="Votre User ID Seller Center" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">API Key Jumia</label>
+                        <input type="password" x-model="jumia.api_key" placeholder="Votre clé API Seller Center" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm">
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <button x-show="!jumia.connected" type="button" @click="connectJumia()"
+                        :disabled="jumia.loading"
+                        class="bg-orange-500 hover:bg-orange-400 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        <span x-text="jumia.loading ? 'Connexion...' : '🔗 Connecter Jumia'"></span>
+                    </button>
+                    <button x-show="jumia.connected" type="button" @click="syncJumiaOrders()"
+                        :disabled="jumia.loading"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        <span x-text="jumia.loading ? 'Synchronisation...' : '🔄 Sync commandes Jumia'"></span>
+                    </button>
+                    <button x-show="jumia.connected" type="button" @click="exportToJumia()"
+                        :disabled="jumia.loading"
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        📦 Exporter produits → Jumia
+                    </button>
+                    <button x-show="jumia.connected" type="button" @click="disconnectJumia()"
+                        class="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-6 py-2.5 rounded-xl font-bold text-sm transition border border-red-500/30">
+                        Déconnecter
+                    </button>
+                </div>
+
+                <div x-show="jumia.message" class="mt-3 text-sm font-bold" :class="jumia.error ? 'text-red-400' : 'text-emerald-400'" x-text="jumia.message"></div>
+            </div>
+
+            <!-- eBay Integration -->
+            <div class="border-t border-slate-800 pt-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style="background:#e53238;color:#fff">e</div>
+                    <h3 class="text-lg font-bold text-white">eBay</h3>
+                    <span x-show="ebay.connected" class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">● CONNECTÉ</span>
+                    <span x-show="!ebay.connected" class="text-[10px] font-black text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">○ NON CONNECTÉ</span>
+                </div>
+                <p class="text-slate-500 text-xs mb-4">Importez vos commandes eBay et exportez vos produits. Obtenez votre <strong>User Token</strong> depuis <a href="https://developer.ebay.com" target="_blank" class="text-indigo-400 underline">developer.ebay.com</a> → My Account → User Tokens.</p>
+                <div x-show="!ebay.connected" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">User Token eBay</label>
+                        <input type="password" x-model="ebay.user_token" placeholder="AgAAAA..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm">
+                    </div>
+                    <div class="flex items-end">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="ebay.sandbox" class="w-4 h-4 rounded">
+                            <span class="text-sm text-slate-400">Mode Sandbox (test)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button x-show="!ebay.connected" type="button" @click="connectEbay()" :disabled="ebay.loading" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        <span x-text="ebay.loading ? 'Connexion...' : '🔗 Connecter eBay'"></span>
+                    </button>
+                    <button x-show="ebay.connected" type="button" @click="syncEbayOrders()" :disabled="ebay.loading" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        <span x-text="ebay.loading ? 'Sync...' : '🔄 Sync commandes eBay'"></span>
+                    </button>
+                    <button x-show="ebay.connected" type="button" @click="exportToEbay()" :disabled="ebay.loading" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        📦 Exporter produits → eBay
+                    </button>
+                    <button x-show="ebay.connected" type="button" @click="disconnectEbay()" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-6 py-2.5 rounded-xl font-bold text-sm transition border border-red-500/30">Déconnecter</button>
+                </div>
+                <div x-show="ebay.message" class="mt-3 text-sm font-bold" :class="ebay.error ? 'text-red-400' : 'text-emerald-400'" x-text="ebay.message"></div>
+            </div>
+
+            <!-- Cdiscount Integration -->
+            <div class="border-t border-slate-800 pt-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs" style="background:#d0021b;color:#fff">CD</div>
+                    <h3 class="text-lg font-bold text-white">Cdiscount</h3>
+                    <span x-show="cds.connected" class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-full">● CONNECTÉ</span>
+                    <span x-show="!cds.connected" class="text-[10px] font-black text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">○ NON CONNECTÉ</span>
+                </div>
+                <p class="text-slate-500 text-xs mb-4">2ème marketplace française. Créez votre compte vendeur sur <a href="https://seller.cdiscount.com" target="_blank" class="text-indigo-400 underline">seller.cdiscount.com</a> puis entrez vos identifiants API ci-dessous.</p>
+                <div x-show="!cds.connected" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Login API Cdiscount</label>
+                        <input type="text" x-model="cds.login" placeholder="votre@email.com" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Mot de passe API</label>
+                        <input type="password" x-model="cds.password" placeholder="Mot de passe API Cdiscount" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm">
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button x-show="!cds.connected" type="button" @click="connectCdiscount()" :disabled="cds.loading" class="bg-red-700 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        <span x-text="cds.loading ? 'Connexion...' : '🔗 Connecter Cdiscount'"></span>
+                    </button>
+                    <button x-show="cds.connected" type="button" @click="syncCdsOrders()" :disabled="cds.loading" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        <span x-text="cds.loading ? 'Sync...' : '🔄 Sync commandes Cdiscount'"></span>
+                    </button>
+                    <button x-show="cds.connected" type="button" @click="exportToCds()" :disabled="cds.loading" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50">
+                        📦 Exporter produits → Cdiscount
+                    </button>
+                    <button x-show="cds.connected" type="button" @click="disconnectCds()" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-6 py-2.5 rounded-xl font-bold text-sm transition border border-red-500/30">Déconnecter</button>
+                </div>
+                <div x-show="cds.message" class="mt-3 text-sm font-bold" :class="cds.error ? 'text-red-400' : 'text-emerald-400'" x-text="cds.message"></div>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" :disabled="loading" class="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-black shadow-xl shadow-indigo-500/20 transition disabled:opacity-50">
+                <span x-text="loading ? 'Enregistrement...' : 'ENREGISTRER LES MODIFICATIONS'"></span>
+            </button>
+        </div>
+    </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function settingsApp() {
+    return {
+        form: { name: '', email: '', phone: '', website: '', country: '', city: '', payment_info: '', wave_number: '', om_number: '', bank_iban: '', cinetpay_api_key: '', cinetpay_site_id: '', paytech_api_key: '', paytech_api_secret: '' },
+        loading: false,
+        cj:    { connected: false, loading: false, email: '', access_token: '', message: '', error: false },
+        jumia: { connected: false, loading: false, user_id: '', api_key: '', country: 'sn', message: '', error: false },
+        ebay:  { connected: false, loading: false, user_token: '', sandbox: false, message: '', error: false },
+        cds:   { connected: false, loading: false, login: '', password: '', message: '', error: false },
+        async init() {
+            if (!requireAuth()) return;
+            const res = await apiFetch('/billing/company-settings');
+            if (res?.ok) this.form = await res.json();
+            this.loadCJStatus();
+            this.loadJumiaStatus();
+            this.loadEbayStatus();
+            this.loadCdsStatus();
+        },
+        // ── CJDropshipping ────────────────────────────────────────────────────
+        async loadCJStatus() {
+            try {
+                const r = await apiFetch('/dropshipping/config');
+                if (r?.ok) { const d = await r.json(); this.cj.connected = d.connected; if (d.email) this.cj.email = d.email; }
+            } catch(e) {}
+        },
+        async connectCJ() {
+            if (!this.cj.email || !this.cj.access_token) { this.cj.message = 'Email et Access Token requis.'; this.cj.error = true; return; }
+            this.cj.loading = true; this.cj.message = '';
+            try {
+                const r = await apiFetch('/dropshipping/config', { method: 'POST', body: JSON.stringify({ email: this.cj.email, access_token: this.cj.access_token }) });
+                const d = await r.json();
+                if (r.ok) { this.cj.connected = true; this.cj.message = '✅ CJDropshipping connecté !'; this.cj.error = false; this.cj.access_token = ''; }
+                else { this.cj.message = d.error || 'Erreur de connexion.'; this.cj.error = true; }
+            } catch(e) { this.cj.message = 'Erreur réseau.'; this.cj.error = true; }
+            finally { this.cj.loading = false; }
+        },
+        async disconnectCJ() {
+            if (!confirm('Déconnecter CJDropshipping ?')) return;
+            await apiFetch('/dropshipping/config', { method: 'DELETE' });
+            this.cj.connected = false; this.cj.email = ''; this.cj.message = 'CJDropshipping déconnecté.'; this.cj.error = false;
+        },
+        async loadJumiaStatus() {
+            try {
+                const res = await apiFetch('/jumia/status');
+                if (res?.ok) {
+                    const data = await res.json();
+                    this.jumia.connected = data.connected;
+                    if (data.country) this.jumia.country = data.country;
+                }
+            } catch(e) {}
+        },
+        async connectJumia() {
+            if (!this.jumia.user_id || !this.jumia.api_key) {
+                this.jumia.message = 'User ID et API Key requis.'; this.jumia.error = true; return;
+            }
+            this.jumia.loading = true; this.jumia.message = '';
+            try {
+                const res = await apiFetch('/jumia/connect', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: this.jumia.user_id, api_key: this.jumia.api_key, country: this.jumia.country })
+                });
+                const data = await res.json();
+                if (res.ok) { this.jumia.connected = true; this.jumia.message = '✅ Jumia connecté !'; this.jumia.error = false; }
+                else { this.jumia.message = data.error || 'Erreur de connexion.'; this.jumia.error = true; }
+            } catch(e) { this.jumia.message = 'Erreur réseau.'; this.jumia.error = true; }
+            finally { this.jumia.loading = false; }
+        },
+        async syncJumiaOrders() {
+            this.jumia.loading = true; this.jumia.message = '';
+            try {
+                const res = await apiFetch('/jumia/sync-orders', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) { this.jumia.message = `✅ ${data.imported} commande(s) importée(s), ${data.skipped} déjà présente(s).`; this.jumia.error = false; }
+                else { this.jumia.message = data.error || 'Erreur sync.'; this.jumia.error = true; }
+            } catch(e) { this.jumia.message = 'Erreur réseau.'; this.jumia.error = true; }
+            finally { this.jumia.loading = false; }
+        },
+        async exportToJumia() {
+            this.jumia.loading = true; this.jumia.message = '';
+            try {
+                const res = await apiFetch('/jumia/export-products', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) { this.jumia.message = `✅ ${data.exported} produit(s) exporté(s) vers Jumia.`; this.jumia.error = false; }
+                else { this.jumia.message = data.error || 'Erreur export.'; this.jumia.error = true; }
+            } catch(e) { this.jumia.message = 'Erreur réseau.'; this.jumia.error = true; }
+            finally { this.jumia.loading = false; }
+        },
+        // ── eBay ────────────────────────────────────────────────────────────
+        async loadEbayStatus() {
+            try { const r = await apiFetch('/ebay/status'); if (r?.ok) { const d = await r.json(); this.ebay.connected = d.connected; } } catch(e) {}
+        },
+        async connectEbay() {
+            if (!this.ebay.user_token) { this.ebay.message = 'User Token requis.'; this.ebay.error = true; return; }
+            this.ebay.loading = true; this.ebay.message = '';
+            try {
+                const r = await apiFetch('/ebay/connect', { method: 'POST', body: JSON.stringify({ user_token: this.ebay.user_token, sandbox: this.ebay.sandbox }) });
+                const d = await r.json();
+                if (r.ok) { this.ebay.connected = true; this.ebay.message = '✅ eBay connecté !'; this.ebay.error = false; }
+                else { this.ebay.message = d.error || 'Erreur.'; this.ebay.error = true; }
+            } catch(e) { this.ebay.message = 'Erreur réseau.'; this.ebay.error = true; }
+            finally { this.ebay.loading = false; }
+        },
+        async syncEbayOrders() {
+            this.ebay.loading = true; this.ebay.message = '';
+            try {
+                const r = await apiFetch('/ebay/sync-orders', { method: 'POST' });
+                const d = await r.json();
+                if (r.ok) { this.ebay.message = `✅ ${d.imported} commande(s) importée(s).`; this.ebay.error = false; }
+                else { this.ebay.message = d.error || 'Erreur.'; this.ebay.error = true; }
+            } catch(e) { this.ebay.message = 'Erreur réseau.'; this.ebay.error = true; }
+            finally { this.ebay.loading = false; }
+        },
+        async exportToEbay() {
+            this.ebay.loading = true; this.ebay.message = '';
+            try {
+                const r = await apiFetch('/ebay/export-products', { method: 'POST' });
+                const d = await r.json();
+                if (r.ok) { this.ebay.message = `✅ ${d.exported} produit(s) exporté(s).`; this.ebay.error = false; }
+                else { this.ebay.message = d.error || 'Erreur.'; this.ebay.error = true; }
+            } catch(e) { this.ebay.message = 'Erreur réseau.'; this.ebay.error = true; }
+            finally { this.ebay.loading = false; }
+        },
+        async disconnectEbay() {
+            if (!confirm('Déconnecter eBay ?')) return;
+            await apiFetch('/ebay/disconnect', { method: 'DELETE' });
+            this.ebay.connected = false; this.ebay.message = 'eBay déconnecté.';
+        },
+        // ── Cdiscount ────────────────────────────────────────────────────────
+        async loadCdsStatus() {
+            try { const r = await apiFetch('/cdiscount/status'); if (r?.ok) { const d = await r.json(); this.cds.connected = d.connected; } } catch(e) {}
+        },
+        async connectCdiscount() {
+            if (!this.cds.login || !this.cds.password) { this.cds.message = 'Login et mot de passe requis.'; this.cds.error = true; return; }
+            this.cds.loading = true; this.cds.message = '';
+            try {
+                const r = await apiFetch('/cdiscount/connect', { method: 'POST', body: JSON.stringify({ login: this.cds.login, password: this.cds.password }) });
+                const d = await r.json();
+                if (r.ok) { this.cds.connected = true; this.cds.message = '✅ Cdiscount connecté !'; this.cds.error = false; }
+                else { this.cds.message = d.error || 'Erreur.'; this.cds.error = true; }
+            } catch(e) { this.cds.message = 'Erreur réseau.'; this.cds.error = true; }
+            finally { this.cds.loading = false; }
+        },
+        async syncCdsOrders() {
+            this.cds.loading = true; this.cds.message = '';
+            try {
+                const r = await apiFetch('/cdiscount/sync-orders', { method: 'POST' });
+                const d = await r.json();
+                if (r.ok) { this.cds.message = `✅ ${d.imported} commande(s) importée(s).`; this.cds.error = false; }
+                else { this.cds.message = d.error || 'Erreur.'; this.cds.error = true; }
+            } catch(e) { this.cds.message = 'Erreur réseau.'; this.cds.error = true; }
+            finally { this.cds.loading = false; }
+        },
+        async exportToCds() {
+            this.cds.loading = true; this.cds.message = '';
+            try {
+                const r = await apiFetch('/cdiscount/export-products', { method: 'POST' });
+                const d = await r.json();
+                if (r.ok) { this.cds.message = `✅ ${d.exported} produit(s) exporté(s).`; this.cds.error = false; }
+                else { this.cds.message = d.error || 'Erreur.'; this.cds.error = true; }
+            } catch(e) { this.cds.message = 'Erreur réseau.'; this.cds.error = true; }
+            finally { this.cds.loading = false; }
+        },
+        async disconnectCds() {
+            if (!confirm('Déconnecter Cdiscount ?')) return;
+            await apiFetch('/cdiscount/disconnect', { method: 'DELETE' });
+            this.cds.connected = false; this.cds.message = 'Cdiscount déconnecté.';
+        },
+        async disconnectJumia() {
+            if (!confirm('Déconnecter Jumia ?')) return;
+            await apiFetch('/jumia/disconnect', { method: 'DELETE' });
+            this.jumia.connected = false; this.jumia.message = 'Jumia déconnecté.'; this.jumia.error = false;
+        },
+        async save() {
+            this.loading = true;
+            try {
+                const res = await apiFetch('/billing/company-settings', {
+                    method: 'PUT',
+                    body: JSON.stringify(this.form)
+                });
+                if (res?.ok) showToast('Paramètres enregistrés !');
+                else showToast('Erreur lors de l\'enregistrement', 'error');
+            } catch(e) { showToast('Erreur réseau', 'error'); }
+            finally { this.loading = false; }
+        }
+    }
+}
+</script>
+</body>
+</html>

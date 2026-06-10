@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche Produit — Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}.glass{background:rgba(15,23,42,.85);backdrop-filter:blur(12px)}</style>
+    <link rel="stylesheet" href="/assets/css/print.css">
+    <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen" x-data="createProductApp()" x-init="init()">
+
+<!-- NAVBAR -->
+<nav class="glass border-b border-slate-800 sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span class="text-white font-extrabold text-lg">S</span>
+            </div>
+            <span class="text-lg font-extrabold text-white">Sunu <span class="text-indigo-400">Gestion</span></span>
+        </a>
+        <div class="hidden md:flex items-center gap-1">
+            <a href="/" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Dashboard</a>
+            <a href="/products.html" class="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-500/10 text-indigo-400">Produits</a>
+            <a href="/pos.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-emerald-400 hover:bg-emerald-500/10 transition font-bold">Vente Rapide (POS)</a>
+            <a href="/invoices.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Factures</a>
+            <a href="/expenses.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Dépenses</a>
+            <a href="/suppliers.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Fournisseurs</a>
+            <a href="/files.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Fichiers</a>
+        </div>
+        <button @click="logout()" class="text-slate-500 hover:text-red-400 transition text-sm font-medium">Déconnexion</button>
+    </div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="/products.html" class="w-10 h-10 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition">←</a>
+        <div>
+            <h1 class="text-3xl font-extrabold text-white" x-text="editMode ? 'Modifier l\'article' : 'Nouvel article'"></h1>
+            <button @click="window.print()" class="mt-4 no-print flex items-center gap-2 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition border border-indigo-500/30"><span>️</span> Imprimer en Couleur</button>
+            <p class="text-slate-500 mt-1" x-text="editMode ? 'Mise à jour des informations du produit' : 'Enregistrement d\'un nouveau produit dans l\'inventaire'"></p>
+        </div>
+    </div>
+
+    <form @submit.prevent="saveProduct" class="space-y-6">
+        <div x-show="formError" x-text="formError" class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl p-4 font-medium"></div>
+
+        <!-- Section Identification -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+            <h2 class="text-lg font-bold text-white mb-6 border-b border-slate-800 pb-2 flex items-center gap-2">
+                <span class="w-2 h-6 bg-indigo-500 rounded-full"></span> Identification
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Nom / Désignation *</label>
+                    <input type="text" x-model="form.name" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-600" placeholder="Ex: iPhone 15 Pro Max">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">SKU (Référence)</label>
+                    <input type="text" x-model="form.sku" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Unité de mesure</label>
+                    <select x-model="form.unit" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Pieces">Pièces</option>
+                        <option value="Kg">Kilogrammes</option>
+                        <option value="Litre">Litres</option>
+                        <option value="Boite">Boîtes</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Catégorie</label>
+                    <input type="text" x-model="form.category" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Ordre d'affichage (Vitrine)</label>
+                    <input type="number" x-model="form.position" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ex: 1, 2, 3...">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Image du produit (pour la boutique)</label>
+                    <div 
+                        class="relative w-full h-48 rounded-2xl border-2 border-dashed border-slate-600 bg-slate-800 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/5 transition-all overflow-hidden"
+                        @click="$refs.imageInput.click()"
+                        @dragover.prevent
+                        @drop.prevent="handleImageDrop($event)"
+                    >
+                        <!-- Preview -->
+                        <img x-show="form.image_url" :src="form.image_url" class="absolute inset-0 w-full h-full object-cover rounded-2xl" style="display:none">
+                        <!-- Overlay d'upload -->
+                        <div class="z-10 flex flex-col items-center gap-2" :class="form.image_url ? 'bg-black/50 absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 hover:opacity-100 transition' : ''">
+                            <span class="text-4xl" x-show="!uploadingImage"></span>
+                            <span class="text-4xl animate-spin" x-show="uploadingImage"></span>
+                            <p class="text-sm font-semibold text-slate-300" x-show="!uploadingImage" x-text="form.image_url ? 'Changer l\'image' : 'Cliquer ou glisser une image'"></p>
+                            <p class="text-xs text-slate-500">JPG, PNG, WEBP • Max 5 Mo</p>
+                        </div>
+                        <input type="file" x-ref="imageInput" accept="image/*" class="hidden" @change="handleImageUpload($event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Prix (Grosse distinction Achat/Vente) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+            <h2 class="text-lg font-bold text-white mb-6 border-b border-slate-800 pb-2 flex items-center gap-2">
+                <span class="w-2 h-6 bg-emerald-500 rounded-full"></span> Tarification & Rentabilité
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Achat -->
+                <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-3"> Coût d'Achat HT</label>
+                    <div class="relative">
+                        <input type="number" x-model.number="form.purchase_price_exc_tax" @input="calculateSellingPrice" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-black text-xl">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">F</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">Prix payé au fournisseur</p>
+                </div>
+
+                <!-- Marge -->
+                <div class="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                    <label class="block text-xs font-black text-emerald-500/60 uppercase mb-3"> Marge bénéficiaire (%)</label>
+                    <div class="relative">
+                        <input type="number" x-model.number="form.margin_percent" @input="calculateSellingPrice" class="w-full bg-slate-800 border border-slate-700 text-emerald-400 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-black text-xl">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">%</span>
+                    </div>
+                    <p class="text-[10px] text-emerald-600/80 mt-2">Pourcentage de profit visé</p>
+                </div>
+
+                <!-- Vente -->
+                <div class="p-4 rounded-xl bg-indigo-600/10 border border-indigo-500/30 shadow-lg shadow-indigo-500/5">
+                    <label class="block text-xs font-black text-indigo-400 uppercase mb-3"> Prix de Vente TTC *</label>
+                    <div class="relative">
+                        <input type="number" x-model.number="form.selling_price_exc_tax" @input="calculateMargin" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-black text-xl">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 font-bold">F</span>
+                    </div>
+                    <p class="text-[10px] text-indigo-400/80 mt-2">Prix affiché au client final</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Stock -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+            <h2 class="text-lg font-bold text-white mb-6 border-b border-slate-800 pb-2 flex items-center gap-2">
+                <span class="w-2 h-6 bg-amber-500 rounded-full"></span> Inventaire & Alertes
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl border border-slate-800">
+                        <div class="w-1/2">
+                            <label class="block text-xs font-bold text-slate-500 mb-2">Quantité en Stock</label>
+                            <input type="number" x-model="form.stock_quantity" min="0" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-xs font-bold text-slate-500 mb-2">Seuil d'alerte</label>
+                            <input type="number" x-model="form.alert_threshold" min="0" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 italic">Sunu Gestion vous enverra une alerte dès que le stock descend sous le seuil.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">Notes internes / Description</label>
+                    <textarea x-model="form.description" rows="4" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Informations complémentaires..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="fixed bottom-0 left-0 w-full glass border-t border-slate-800 p-4 z-40 shadow-2xl">
+            <div class="max-w-5xl mx-auto flex justify-between items-center px-4">
+                <div class="text-xs text-slate-500 hidden md:block">Les modifications sont enregistrées instantanément dans votre base locale.</div>
+                <div class="flex gap-4 w-full md:w-auto">
+                    <a href="/products.html" class="flex-1 md:flex-none text-center px-8 py-3 rounded-xl font-bold text-slate-400 hover:text-white transition">Annuler</a>
+                    <button type="submit" :disabled="loading" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-3 rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition disabled:opacity-50 flex justify-center items-center gap-2">
+                        <span x-show="loading" class="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+                        <span x-text="editMode ? 'Mettre à jour' : 'Enregistrer le produit'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function createProductApp() {
+    return {
+        loading: false, formError: '', editMode: false, productId: null, uploadingImage: false,
+        form: {
+            name: '', sku: '', barcode_type: 'C128', unit: 'Pieces', brand: '', category: '', sub_category: '',
+            manage_stock: true, stock_quantity: 0, alert_threshold: 5,
+            description: '', has_imei: false, not_for_sale: false, weight: '', prep_time: '',
+            tax_rate: 18, tax_type: 'exclusive', product_type: 'single',
+            purchase_price_exc_tax: 0, margin_percent: 25, selling_price_exc_tax: 0,
+            image_url: '', position: 0
+        },
+        async init() {
+            if (!requireAuth()) return;
+            const params = new URLSearchParams(window.location.search);
+            this.productId = params.get('id');
+            if (this.productId) {
+                this.editMode = true;
+                await this.loadProduct();
+            }
+        },
+        async loadProduct() {
+            const res = await apiFetch(`/products/${this.productId}`);
+            if (res.ok) {
+                const p = await res.json();
+                this.form = { ...this.form, ...p };
+                // On s'assure que le prix de vente affiché est bien selling_price_exc_tax (ou price selon le backend)
+                this.form.selling_price_exc_tax = p.price;
+            }
+        },
+        async handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            await this.uploadImageFile(file);
+        },
+        async handleImageDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            await this.uploadImageFile(file);
+        },
+        async uploadImageFile(file) {
+            this.uploadingImage = true;
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await apiFetch('/images/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res && res.ok) {
+                    const data = await res.json();
+                    this.form.image_url = data.url;
+                } else {
+                    this.formError = 'Erreur lors de l\'upload de l\'image.';
+                }
+            } catch (e) {
+                this.formError = 'Erreur de connexion lors de l\'upload.';
+            } finally {
+                this.uploadingImage = false;
+            }
+        },
+        calculateSellingPrice() {
+            const p = parseFloat(this.form.purchase_price_exc_tax) || 0;
+            const m = parseFloat(this.form.margin_percent) || 0;
+            this.form.selling_price_exc_tax = Math.round(p + (p * m / 100));
+        },
+        calculateMargin() {
+            const p = parseFloat(this.form.purchase_price_exc_tax) || 0;
+            const s = parseFloat(this.form.selling_price_exc_tax) || 0;
+            if (p > 0) this.form.margin_percent = parseFloat(((s - p) / p * 100).toFixed(2));
+            else this.form.margin_percent = 100;
+        },
+        async saveProduct() {
+            this.loading = true;
+            try {
+                const method = this.editMode ? 'PUT' : 'POST';
+                const url = this.editMode ? `/products/${this.productId}` : '/products';
+                const res = await apiFetch(url, { method, body: JSON.stringify(this.form) });
+                if (res.ok) window.location.href = '/products.html';
+                else { const d = await res.json(); this.formError = d.error || 'Erreur lors de l\'enregistrement'; }
+            } catch (e) { this.formError = "Erreur de connexion"; } finally { this.loading = false; }
+        }
+    }
+}
+</script>
+<script src="/assets/js/calculator.js"></script>
+</body>
+</html>

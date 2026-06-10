@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivre ma commande — Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #02040f; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start py-12 px-4 text-slate-200">
+
+    <!-- Header -->
+    <div class="w-full max-w-xl mb-8 text-center">
+        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-bold mb-6 transition">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Retour à la boutique
+        </a>
+        <h1 class="text-3xl font-extrabold text-white mb-2">Suivre ma commande</h1>
+        <p class="text-slate-400 text-sm">Entrez votre numéro de commande pour voir son statut en temps réel.</p>
+    </div>
+
+    <!-- Formulaire de recherche -->
+    <div class="w-full max-w-xl">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl mb-6">
+            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Numéro de commande</label>
+            <div class="flex gap-3">
+                <input
+                    type="text"
+                    id="invoiceInput"
+                    placeholder="Ex: WEB-2026-00001"
+                    class="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase"
+                    onkeydown="if(event.key==='Enter') trackOrder()"
+                />
+                <button
+                    onclick="trackOrder()"
+                    id="searchBtn"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition flex items-center gap-2"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    Rechercher
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Le numéro se trouve dans l'email de confirmation ou dans le SMS reçu.</p>
+        </div>
+
+        <!-- État de chargement -->
+        <div id="loading" class="hidden py-12 text-center">
+            <svg class="spinner w-8 h-8 mx-auto mb-3 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <p class="text-slate-400 text-sm">Recherche en cours...</p>
+        </div>
+
+        <!-- Erreur -->
+        <div id="errorBox" class="hidden bg-red-500/10 border border-red-500/30 rounded-2xl p-5 text-center">
+            <div class="text-2xl mb-2">❌</div>
+            <p id="errorMsg" class="text-red-400 font-bold text-sm"></p>
+            <p class="text-slate-500 text-xs mt-2">Vérifiez le numéro et réessayez, ou contactez le vendeur.</p>
+        </div>
+
+        <!-- Résultat -->
+        <div id="resultBox" class="hidden space-y-4">
+
+            <!-- Statut principal -->
+            <div id="statusCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Commande</div>
+                        <div id="resInvoiceNum" class="text-xl font-black text-white font-mono"></div>
+                        <div id="resCompany" class="text-xs text-indigo-400 font-bold mt-1"></div>
+                    </div>
+                    <div id="statusBadge" class="text-right"></div>
+                </div>
+
+                <!-- Barre de progression -->
+                <div class="mt-4">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                        <span>Reçu</span>
+                        <span>Validé</span>
+                        <span>En préparation</span>
+                        <span>Expédié</span>
+                        <span>Livré</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2">
+                        <div id="progressBar" class="h-2 rounded-full transition-all duration-500" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infos client + paiement -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Client</div>
+                    <div id="resClient" class="text-sm font-bold text-white"></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Paiement</div>
+                    <div id="resPayment" class="text-sm font-bold text-white"></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Date commande</div>
+                    <div id="resDate" class="text-sm font-bold text-white"></div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total</div>
+                    <div id="resTotal" class="text-sm font-black text-emerald-400"></div>
+                </div>
+            </div>
+
+            <!-- Articles commandés -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Articles commandés</div>
+                <div id="resItems" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const PAYMENT_LABELS = {
+        wave: '🌊 Wave',
+        orange_money: '🟠 Orange Money',
+        cash: '💵 Espèces',
+        card: '💳 Carte Bancaire',
+        cinetpay: '⚡ CinetPay',
+    };
+
+    const PROGRESS_MAP = {
+        pending: 10,
+        pending_payment: 25,
+        paid: 50,
+        confirmed: 60,
+        shipped: 80,
+        delivered: 100,
+        cancelled: 0,
+    };
+
+    const PROGRESS_COLORS = {
+        pending: '#f59e0b',
+        pending_payment: '#f97316',
+        paid: '#6366f1',
+        confirmed: '#6366f1',
+        shipped: '#0ea5e9',
+        delivered: '#10b981',
+        cancelled: '#ef4444',
+    };
+
+    function fmt(d) {
+        if (!d) return '—';
+        return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function trackOrder() {
+        const raw = document.getElementById('invoiceInput').value.trim().toUpperCase();
+        if (!raw) { document.getElementById('invoiceInput').focus(); return; }
+
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('errorBox').classList.add('hidden');
+        document.getElementById('resultBox').classList.add('hidden');
+        document.getElementById('searchBtn').disabled = true;
+
+        try {
+            const origin = window.location.origin.includes('localhost')
+                ? 'http://localhost:3001'
+                : window.location.origin;
+            const res  = await fetch(`${origin}/api/public/track/${encodeURIComponent(raw)}`);
+            const data = await res.json();
+
+            document.getElementById('loading').classList.add('hidden');
+
+            if (!res.ok) {
+                document.getElementById('errorMsg').textContent = data.error || 'Commande introuvable.';
+                document.getElementById('errorBox').classList.remove('hidden');
+                return;
+            }
+
+            // Remplir les champs
+            document.getElementById('resInvoiceNum').textContent = data.invoice_number;
+            document.getElementById('resCompany').textContent    = data.company_name;
+            document.getElementById('resClient').textContent     = data.client_name;
+            document.getElementById('resDate').textContent       = fmt(data.created_at);
+            document.getElementById('resTotal').textContent      =
+                Number(data.total_amount).toLocaleString('fr-FR') + ' ' + (data.currency || 'F CFA');
+            document.getElementById('resPayment').textContent    =
+                PAYMENT_LABELS[data.payment_method] || data.payment_method || '—';
+
+            // Badge statut
+            document.getElementById('statusBadge').innerHTML = `
+                <div style="font-size:28px; margin-bottom:4px;">${data.status_icon}</div>
+                <div style="font-size:12px; font-weight:800; color:${data.status_color};">${data.status_label}</div>
+            `;
+
+            // Barre de progression
+            const bar = document.getElementById('progressBar');
+            bar.style.width = (PROGRESS_MAP[data.status] || 0) + '%';
+            bar.style.background = PROGRESS_COLORS[data.status] || '#94a3b8';
+
+            // Articles
+            const itemsEl = document.getElementById('resItems');
+            if (data.items && data.items.length > 0) {
+                itemsEl.innerHTML = data.items.map(it => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div>
+                            <div style="font-size:13px; font-weight:700; color:#e2e8f0;">${it.product_name}</div>
+                            <div style="font-size:11px; color:#94a3b8;">× ${it.quantity} unité(s)</div>
+                        </div>
+                        <div style="font-size:13px; font-weight:800; color:#fff;">${Number(it.unit_price * it.quantity).toLocaleString('fr-FR')} F</div>
+                    </div>
+                `).join('');
+            } else {
+                itemsEl.innerHTML = '<p style="font-size:12px; color:#64748b; text-align:center;">Détail articles non disponible.</p>';
+            }
+
+            document.getElementById('resultBox').classList.remove('hidden');
+        } catch (err) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('errorMsg').textContent = 'Erreur de connexion au serveur.';
+            document.getElementById('errorBox').classList.remove('hidden');
+        } finally {
+            document.getElementById('searchBtn').disabled = false;
+        }
+    }
+
+    // Préremplir depuis l'URL (?order=WEB-2026-00001)
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderParam = urlParams.get('order');
+    if (orderParam) {
+        document.getElementById('invoiceInput').value = orderParam.toUpperCase();
+        trackOrder();
+    }
+    </script>
+</body>
+</html>

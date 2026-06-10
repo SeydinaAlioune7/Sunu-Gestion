@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fichiers cryptés â€” Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}.glass{background:rgba(15,23,42,.85);backdrop-filter:blur(12px)}</style>
+    <link rel="stylesheet" href="/assets/css/print.css">
+    <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen" x-data="filesApp()" x-init="init()">
+
+<!-- NAVBAR -->
+<nav class="glass border-b border-slate-800 sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-xl flex items-center justify-center"><span class="text-white font-extrabold text-lg">S</span></div>
+            <span class="text-lg font-extrabold text-white">Sunu <span class="text-indigo-400">Gestion</span></span>
+        </a>
+                <div class="hidden md:flex items-center gap-1">
+            <a href="/" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Dashboard</a>
+            <a href="/products.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Produits</a>
+            <a href="/pos.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-emerald-400 hover:bg-emerald-500/10 transition font-bold">Vente Rapide (POS)</a>
+            <a href="/invoices.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Factures</a>
+            <a href="/expenses.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Dépenses</a>
+            <a href="/visitors.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Visiteurs</a>
+            <a href="/suppliers.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Fournisseurs</a>
+            <a href="/files.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Fichiers</a>
+        </div>
+        <button @click="logout()" class="text-slate-500 hover:text-red-400 transition text-sm font-medium">Déconnexion</button>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-white">Coffre-fort numérique</h1>
+            <button @click="window.print()" class="mt-4 no-print flex items-center gap-2 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition border border-indigo-500/30"><span>️</span> Imprimer en Couleur</button>
+            <p class="text-slate-500 mt-1">Fichiers chiffrés AES-256 â€¢ Sécurité niveau militaire</p>
+        </div>
+    </div>
+
+    <!-- Barre stockage -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-8">
+        <div class="flex justify-between items-end mb-3">
+            <div>
+                <span class="text-sm text-slate-400">Espace utilisé</span>
+                <div class="text-2xl font-extrabold text-white"><span x-text="formatBytes(storage.used)"></span> <span class="text-slate-500 text-lg font-normal">/ 15 Go</span></div>
+            </div>
+            <div class="text-right">
+                <span class="text-sm text-slate-500"><span x-text="files.length"></span> fichier(s)</span>
+            </div>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-3">
+            <div class="bg-gradient-to-r from-indigo-500 to-violet-500 h-3 rounded-full transition-all duration-500" :style="'width:' + storage.percentage + '%'"></div>
+        </div>
+    </div>
+
+    <!-- Zone upload -->
+    <div class="bg-slate-900/50 border-2 border-dashed border-slate-700 rounded-2xl p-10 text-center mb-8 hover:border-indigo-500/50 transition cursor-pointer"
+        @click="$refs.fileInput.click()"
+        @dragover.prevent="dragOver = true"
+        @dragleave.prevent="dragOver = false"
+        @drop.prevent="handleDrop($event)"
+        :class="{ 'border-indigo-500 bg-indigo-500/5': dragOver }">
+        <input type="file" x-ref="fileInput" class="hidden" @change="uploadFile($event)" multiple>
+        <div class="text-4xl mb-3">ðŸ”’</div>
+        <p class="text-white font-bold text-lg">Glissez vos fichiers ici ou cliquez pour parcourir</p>
+        <p class="text-slate-500 text-sm mt-2">Chaque fichier est chiffré individuellement avec AES-256-GCM avant le stockage</p>
+        <p class="text-slate-600 text-xs mt-1">Maximum 50 Mo par fichier</p>
+    </div>
+
+    <!-- Upload en cours -->
+    <div x-show="uploading" class="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5 mb-6 flex items-center gap-4">
+        <svg class="animate-spin h-6 w-6 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+        <span class="text-indigo-300 font-semibold">Chiffrement et upload en cours...</span>
+    </div>
+
+    <!-- Liste fichiers -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="border-b border-slate-800">
+                <tr class="text-slate-500 text-xs uppercase tracking-wider">
+                    <th class="text-left px-5 py-4">Fichier</th>
+                    <th class="text-right px-5 py-4">Taille</th>
+                    <th class="text-center px-5 py-4">Date</th>
+                    <th class="px-5 py-4"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+                <template x-for="f in files" :key="f.id">
+                    <tr class="hover:bg-slate-800/50 transition">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg" x-text="getFileIcon(f.mime_type)"></span>
+                                <div>
+                                    <div class="font-semibold text-white" x-text="f.original_name"></div>
+                                    <div class="text-xs text-slate-500" x-text="f.mime_type || 'inconnu'"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 text-right text-slate-400" x-text="formatBytes(f.size_bytes)"></td>
+                        <td class="px-5 py-4 text-center text-slate-500" x-text="formatDate(f.uploaded_at)"></td>
+                        <td class="px-5 py-4 text-right">
+                            <div class="flex gap-3 justify-end">
+                                <button @click="downloadFile(f.id, f.original_name)" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold">Télécharger</button>
+                                <button @click="deleteFile(f.id)" class="text-xs text-red-400 hover:text-red-300 font-semibold">Supprimer</button>
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+        <div x-show="files.length === 0" class="py-12 text-center text-slate-600">Aucun fichier. Uploadez votre premier document sécurisé.</div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function filesApp() {
+    return {
+        files: [], storage: { used: 0, max: 0, percentage: 0 },
+        uploading: false, dragOver: false,
+        async init() {
+            if (!requireAuth()) return;
+            await this.loadFiles();
+        },
+        async loadFiles() {
+            const res = await apiFetch('/files');
+            if (res?.ok) {
+                const data = await res.json();
+                this.files = data.files;
+                this.storage = data.storage;
+            }
+        },
+        getFileIcon(mime) {
+            if (!mime) return 'ðŸ“„';
+            if (mime.startsWith('image/')) return 'ðŸ–¼ï¸';
+            if (mime.includes('pdf')) return 'ðŸ“•';
+            if (mime.includes('spreadsheet') || mime.includes('excel')) return 'ðŸ“Š';
+            if (mime.includes('word') || mime.includes('document')) return 'ðŸ“';
+            if (mime.includes('zip') || mime.includes('archive')) return 'ðŸ“¦';
+            if (mime.startsWith('video/')) return 'ðŸŽ¬';
+            return 'ðŸ“„';
+        },
+        async uploadFile(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            for (const file of files) {
+                await this._upload(file);
+            }
+            event.target.value = '';
+        },
+        async handleDrop(event) {
+            this.dragOver = false;
+            const files = event.dataTransfer.files;
+            for (const file of files) {
+                await this._upload(file);
+            }
+        },
+        async _upload(file) {
+            this.uploading = true;
+            const formData = new FormData();
+            formData.append('file', file);
+            const token = getToken();
+            const res = await fetch('/api/files/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            this.uploading = false;
+            if (res?.ok) { await this.loadFiles(); }
+            else { const d = await res.json(); alert(d?.error || 'Erreur upload.'); }
+        },
+        async downloadFile(id, name) {
+            const token = getToken();
+            const res = await fetch(`/api/files/${id}/download`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res?.ok) { alert('Erreur téléchargement.'); return; }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+        },
+        async deleteFile(id) {
+            if (!confirm('Supprimer ce fichier ?')) return;
+            const res = await apiFetch(`/files/${id}`, { method: 'DELETE' });
+            if (res?.ok) await this.loadFiles();
+        }
+    }
+}
+</script>
+<script src="/assets/js/calculator.js"></script>
+<script src="/assets/js/calculator.js"></script>
+</body>
+</html>
+

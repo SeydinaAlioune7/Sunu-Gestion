@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caisse Tactile (POS) — Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); }
+        .pos-grid { height: calc(100vh - 140px); overflow-y: auto; }
+        .cart-panel { height: calc(100vh - 80px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    </style>
+    <link rel="stylesheet" href="/assets/css/print.css">
+    <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body class="bg-slate-950 text-slate-200" x-data="posApp()" x-init="init()">
+
+<nav class="glass border-b border-slate-800 h-16 flex items-center px-6 justify-between shrink-0 no-print">
+    <div class="flex items-center gap-6">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white">A</div>
+            <span class="font-extrabold text-white">POS <span class="text-indigo-400">Terminal</span></span>
+        </a>
+        <button @click="showNotesModal = true" class="px-4 py-2 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-900 rounded-xl font-bold transition flex items-center gap-2">📝 Notes Vendeur</button>
+        <input type="text" x-model="search" placeholder="Rechercher un produit..." class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="text-right">
+            <div class="text-xs text-slate-500 uppercase font-bold tracking-widest">Utilisateur</div>
+            <div class="text-sm font-bold text-white" x-text="user?.full_name"></div>
+        </div>
+        <a href="/" class="p-2 hover:bg-slate-800 rounded-xl transition text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        </a>
+    </div>
+</nav>
+
+<div class="flex">
+    <main class="flex-grow p-6">
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button @click="category = ''" :class="category === '' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'" class="px-4 py-2 rounded-xl text-sm font-bold transition">Tout</button>
+            <template x-for="cat in categories" :key="cat">
+                <button @click="category = cat" :class="category === cat ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'" class="px-4 py-2 rounded-xl text-sm font-bold transition" x-text="cat"></button>
+            </template>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pos-grid">
+            <template x-for="p in filteredProducts" :key="p.id">
+                <div @click="addToCart(p)" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 cursor-pointer hover:border-indigo-500 transition shadow-lg">
+                    <div class="aspect-square bg-slate-800 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
+                        <template x-if="p.image_url"><img :src="p.image_url" class="w-full h-full object-cover"></template>
+                        <template x-if="!p.image_url"><span class="text-4xl opacity-20"></span></template>
+                    </div>
+                    <h3 class="font-bold text-sm text-white line-clamp-1" x-text="p.name"></h3>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-indigo-400 font-extrabold" x-text="formatCFA(p.price)"></span>
+                        <span class="text-[10px] text-slate-500" x-text="p.stock_quantity + ' pcs'"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <aside class="w-96 bg-slate-900 border-l border-slate-800 cart-panel flex flex-col">
+        <div class="p-6 border-b border-slate-800">
+            <h2 class="font-extrabold text-xl text-white">Panier <span class="bg-indigo-600 text-xs px-2 py-0.5 rounded-full" x-text="cart.length"></span></h2>
+        </div>
+        <div class="flex-grow overflow-y-auto p-4 space-y-3">
+            <template x-for="(item, index) in cart" :key="index">
+                <div class="flex items-center gap-3 bg-slate-800/30 p-3 rounded-xl border border-slate-800">
+                    <div class="flex-grow">
+                        <div class="text-sm font-bold text-white" x-text="item.name"></div>
+                        <div class="text-xs text-slate-500" x-text="formatCFA(item.price)"></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button @click="updateQty(index, -1)" class="w-7 h-7 bg-slate-800 rounded">-</button>
+                        <span class="w-4 text-center font-bold" x-text="item.quantity"></span>
+                        <button @click="updateQty(index, 1)" class="w-7 h-7 bg-slate-800 rounded">+</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="p-6 bg-slate-950 border-t border-slate-800 space-y-4">
+            <div class="flex justify-between text-white font-extrabold text-2xl"><span>TOTAL</span><span class="text-indigo-400" x-text="formatCFA(subtotal)"></span></div>
+            <button @click="processSale()" :disabled="cart.length === 0 || loading" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 disabled:opacity-50">Valider la vente</button>
+        </div>
+    </aside>
+</div>
+
+<div x-show="showSuccess" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm" x-cloak>
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-sm w-full text-center">
+        <div class="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl"></div>
+        <h2 class="text-2xl font-extrabold text-white mb-6">Vente validée !</h2>
+        <button @click="showSuccess = false" class="w-full bg-indigo-600 py-3 rounded-xl font-bold">Nouvelle vente</button>
+    </div>
+</div>
+
+<!-- Modal Notes Rapides (POS) -->
+<div x-show="showNotesModal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" style="display: none;" x-transition>
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-lg w-full shadow-2xl relative">
+        <button @click="showNotesModal = false" class="absolute top-4 right-4 text-slate-500 hover:text-white font-bold transition">✕</button>
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center text-xl">📝</div>
+            <div>
+                <h2 class="text-xl font-bold text-white">Bloc-notes Vendeur</h2>
+                <p class="text-xs text-slate-400">Gardez vos mémos ou demandes clients sous la main.</p>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <textarea x-model="quickNoteContent" rows="6" placeholder="Écrivez votre note ici... Elle sera sauvegardée sur cette caisse." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none transition resize-none"></textarea>
+            
+            <div class="flex justify-end gap-3">
+                <button @click="clearNote()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-red-400 hover:bg-slate-800 transition">Effacer</button>
+                <button @click="saveNote()" class="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function posApp() {
+    return {
+        user: null, products: [], categories: [], search: '', category: '',
+        cart: [], subtotal: 0, loading: false, showSuccess: false,
+        showNotesModal: false, quickNoteContent: '',
+        async init() { 
+            if (!requireAuth()) return; 
+            this.user = getUser(); 
+            this.quickNoteContent = localStorage.getItem('sunugestion_pos_note') || '';
+            await this.loadProducts(); 
+        },
+        async loadProducts() {
+            const res = await apiFetch('/products');
+            if (res?.ok) {
+                this.products = await res.json();
+                this.categories = [...new Set(this.products.map(p => p.category).filter(Boolean))];
+            }
+        },
+        get filteredProducts() {
+            return this.products.filter(p => (p.name.toLowerCase().includes(this.search.toLowerCase()) || p.sku?.includes(this.search)) && (!this.category || p.category === this.category));
+        },
+        addToCart(product) {
+            const i = this.cart.findIndex(it => it.id === product.id);
+            if (i > -1) this.cart[i].quantity++;
+            else this.cart.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+            this.calculateTotal();
+        },
+        updateQty(i, d) { this.cart[i].quantity += d; if (this.cart[i].quantity <= 0) this.cart.splice(i, 1); this.calculateTotal(); },
+        calculateTotal() { this.subtotal = this.cart.reduce((s, it) => s + (it.price * it.quantity), 0); },
+        async processSale() {
+            this.loading = true;
+            const res = await apiFetch('/invoices', { method: 'POST', body: JSON.stringify({ client_name: 'Client Comptoir', items: this.cart.map(it => ({ product_id: it.id, quantity: it.quantity })) }) });
+            if (res?.ok) { this.showSuccess = true; this.cart = []; this.subtotal = 0; await this.loadProducts(); }
+            this.loading = false;
+        },
+        saveNote() {
+            localStorage.setItem('sunugestion_pos_note', this.quickNoteContent);
+            this.showNotesModal = false;
+            alert('✅ Note sauvegardée !');
+        },
+        clearNote() {
+            if(confirm('Voulez-vous vraiment effacer cette note ?')) {
+                this.quickNoteContent = '';
+                localStorage.removeItem('sunugestion_pos_note');
+            }
+        }
+    }
+}
+</script>
+<script src="/assets/js/calculator.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* --- SUNU GESTION PREMIUM SAAS THEME --- */
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-color: #0f172a !important; /* Slate 900 */
+    color: #f8fafc !important; /* Slate 50 */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar premium */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+
+/* Navigation Glassmorphism */
+nav.glass {
+    background: rgba(15, 23, 42, 0.7) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Cards & Containers */
+.bg-slate-900 {
+    background: #1e293b !important; /* Slate 800 for cards */
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+/* Inputs & Forms */
+input, select, textarea {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+    transition: all 0.2s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: #6366f1 !important; /* Indigo 500 */
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none !important;
+}
+
+/* Buttons */
+button, .btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+button:active {
+    transform: scale(0.97) !important;
+}
+
+/* Tables */
+table th {
+    background: rgba(15, 23, 42, 0.4) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    color: #94a3b8 !important; /* Slate 400 */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+table tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
+}
+table tr:hover {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Modals */
+.bg-black\/60 {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* Remove AI Emojis & Text */
+.emoji { display: none !important; }

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abonnement — Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}.glass{background:rgba(15,23,42,.85);backdrop-filter:blur(12px)}</style>
+    <link rel="stylesheet" href="/assets/css/print.css">
+    <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen" x-data="billingApp()" x-init="init()">
+
+<nav class="glass border-b border-slate-800 sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white text-xs">A</div>
+            <span class="font-extrabold text-white text-sm uppercase">Sunu <span class="text-indigo-500">Gestion</span></span>
+        </a>
+        <div class="flex items-center gap-4">
+            <span x-text="user?.full_name" class="text-xs font-bold text-slate-400"></span>
+            <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition font-bold">Retour</a>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-4 py-12">
+    <!-- Alerte en attente d'approbation -->
+    <div x-show="isPendingApproval" class="bg-indigo-500/10 border border-indigo-500/40 rounded-3xl p-6 mb-8 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-xl shrink-0">⏳</div>
+        <div>
+            <h3 class="font-extrabold text-white text-base">Votre compte est en cours de validation</h3>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">L'administrateur doit approuver votre inscription avant que vous puissiez accéder à la plateforme. Cette vérification permet de garantir la qualité de notre service. Vous serez notifié dès l'activation.</p>
+            <p class="text-indigo-400 text-xs mt-2 font-bold">Délai habituel : quelques heures.</p>
+        </div>
+    </div>
+
+    <!-- Alerte compte suspect -->
+    <div x-show="isSuspect" class="bg-orange-500/10 border border-orange-500/40 rounded-3xl p-6 mb-8 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center text-xl shrink-0">⚠️</div>
+        <div>
+            <h3 class="font-extrabold text-white text-base">Identifiants non conformes — Accès bloqué</h3>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">Votre compte a été détecté comme suspect lors de l'inscription (email ou nom fictif). Pour continuer à utiliser la plateforme, vous devez soit fournir vos <strong class="text-white">vrais identifiants</strong> (contactez le support), soit souscrire directement à un abonnement.</p>
+            <a href="mailto:aliounebadaraibnabutalibdiene@gmail.com?subject=Mise%20à%20jour%20identifiants%20compte%20suspect" class="mt-3 inline-block text-xs bg-orange-600 hover:bg-orange-500 text-white px-4 py-1.5 rounded-lg font-bold transition">Contacter le support</a>
+        </div>
+    </div>
+
+    <!-- Alerte expiration -->
+    <div x-show="isExpired && !isSuspect && billing.status !== 'pending_payment'" class="bg-red-500/10 border border-red-500/30 rounded-3xl p-6 mb-8 flex items-center gap-4 text-red-200">
+        <div class="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center text-xl shrink-0">🚨</div>
+        <div>
+            <h3 class="font-extrabold text-white text-base">Accès Suspendu — Période d'essai ou Abonnement expiré</h3>
+            <p class="text-slate-400 text-xs mt-1">Votre accès à la plateforme est suspendu. Veuillez effectuer le transfert ci-dessous pour prolonger votre abonnement et continuer à gérer vos stocks et vos ventes.</p>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <h1 class="text-4xl font-extrabold text-white">Mon Abonnement</h1>
+            <button @click="window.print()" class="mt-4 no-print flex items-center gap-2 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition border border-indigo-500/30"><span>️</span> Imprimer en Couleur</button>
+        <p class="text-slate-500 mt-2">Gérez votre souscription et vos paiements.</p>
+    </div>
+
+    <!-- Alerte Paiement En Attente de Validation -->
+    <div x-show="billing?.status === 'pending_payment'" class="mb-8 p-6 bg-gradient-to-br from-amber-600/10 to-yellow-600/10 border border-amber-500/30 rounded-3xl text-left flex items-start gap-4 text-amber-200">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-xl shrink-0">⏳</div>
+        <div>
+            <h3 class="font-extrabold text-white text-base">Paiement en cours de validation</h3>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">Votre justificatif de paiement a bien été soumis. Le propriétaire **Alioune** procède actuellement à sa vérification manuelle. Votre compte sera activé dans les plus brefs délais (sous 12 heures).</p>
+        </div>
+    </div>
+
+    <!-- Statut Actuel -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 mb-12 flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl shadow-indigo-500/5">
+        <div>
+            <div class="text-slate-500 text-sm font-bold uppercase tracking-widest mb-1">Statut du compte</div>
+            <div class="flex items-center gap-3">
+                <span class="text-3xl font-black text-white capitalize" x-text="(billing.status === 'trial' && billing.days_left > 1000) ? 'Propriétaire' : (billing.status === 'trial' ? 'Essai Gratuit' : (billing.status === 'active' ? 'Actif' : (billing.status === 'pending_payment' ? 'Validation en cours' : (billing.status === 'loading' ? 'Chargement...' : 'Expiré'))))"></span>
+                <span :class="{
+                    'bg-emerald-500/20 text-emerald-400': billing.status === 'active' || (billing.status === 'trial' && billing.days_left > 1000),
+                    'bg-amber-500/20 text-amber-400': billing.status === 'trial' || billing.status === 'pending_payment',
+                    'bg-red-500/20 text-red-400': billing.status !== 'active' && billing.status !== 'trial' && billing.status !== 'pending_payment' && billing.status !== 'loading'
+                }" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest" x-show="billing.status !== 'loading'" x-text="billing.status === 'pending_payment' ? 'Attente' : billing.status"></span>
+            </div>
+            <div class="text-slate-500 text-sm mt-2" x-show="billing.status === 'trial'">
+                <template x-if="billing.days_left > 1000">
+                    <span class="text-indigo-400 font-bold">✓ Licence Permanente (Gérant / Partenaire)</span>
+                </template>
+                <template x-if="billing.days_left <= 1000">
+                    <span>Il vous reste <strong class="text-white" x-text="billing.days_left"></strong> jours d'essai gratuit.</span>
+                </template>
+            </div>
+            <div class="text-slate-500 text-sm mt-2" x-show="billing.status === 'pending_payment'">Votre justificatif de transfert a bien été enregistré.</div>
+            <div class="text-slate-500 text-sm mt-2" x-show="billing.status === 'active'">Expire le : <strong class="text-white" x-text="formatDate(billing.trial_end_date)"></strong></div>
+        </div>
+        <div class="w-full md:w-auto">
+            <button x-show="billing.status === 'trial' || billing.status === 'expired'" @click="showPlans = true" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-black shadow-xl shadow-indigo-500/20 transition">PASSER AU PACK PRO</button>
+        </div>
+    </div>
+
+    <!-- Plans -->
+    <div x-show="billing.status !== 'loading'" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Pack Standard -->
+        <div class="bg-slate-900 border-2 border-slate-800 rounded-3xl p-8 transition relative overflow-hidden flex flex-col justify-between">
+            <div>
+                <h3 class="text-xl font-extrabold text-white mb-2">Pack Standard</h3>
+                <div class="flex items-baseline gap-1 mb-6">
+                    <span class="text-4xl font-black text-white">5 000</span>
+                    <span class="text-slate-500 font-bold">FCFA / mois</span>
+                    <span class="text-xs font-bold text-slate-500 ml-2">(~7,62 €)</span>
+                </div>
+                <ul class="space-y-3 mb-8 text-sm text-slate-400">
+                    <li class="flex items-center gap-2 font-medium">🟢 Ventes & Factures illimitées</li>
+                    <li class="flex items-center gap-2 font-medium">🟢 Stock de base & POS caisse</li>
+                    <li class="flex items-center gap-2 font-medium">🟢 Jusqu'à 3 utilisateurs actifs</li>
+                    <li class="flex items-center gap-2 font-medium">🟢 Support client par Email</li>
+                    <li class="flex items-center gap-2 font-medium text-slate-600 line-through">🔴 Gestion Multi-sites & Dépôts</li>
+                    <li class="flex items-center gap-2 font-medium text-slate-600 line-through">🔴 Support Prioritaire WhatsApp</li>
+                </ul>
+            </div>
+            <button @click="selectPlan({ id: 'monthly', name: 'Pack Standard' })" :disabled="loading" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black transition">
+                S'abonner maintenant
+            </button>
+        </div>
+
+        <!-- Pack Premium -->
+        <div class="bg-slate-900 border-2 border-indigo-500/30 rounded-3xl p-8 transition relative overflow-hidden flex flex-col justify-between shadow-2xl shadow-indigo-500/5">
+            <div>
+                <div class="absolute top-4 right-4 bg-indigo-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider">Économique</div>
+                <h3 class="text-xl font-extrabold text-indigo-400 mb-2">Pack Premium</h3>
+                <div class="flex items-baseline gap-1 mb-6">
+                    <span class="text-4xl font-black text-white">50 000</span>
+                    <span class="text-slate-500 font-bold">FCFA / an</span>
+                    <span class="text-xs font-bold text-slate-500 ml-2">(~76,22 €)</span>
+                </div>
+                <ul class="space-y-3 mb-8 text-sm text-slate-300">
+                    <li class="flex items-center gap-2 font-bold text-slate-200">⭐ Utilisateurs ILLIMITÉS</li>
+                    <li class="flex items-center gap-2 font-bold text-slate-200">⭐ Gestion multi-sites & multi-dépôts</li>
+                    <li class="flex items-center gap-2 font-bold text-slate-200">⭐ Caisse POS ultra-rapide connectée</li>
+                    <li class="flex items-center gap-2 font-bold text-slate-200">⭐ Alertes de stock prédictives</li>
+                    <li class="flex items-center gap-2 font-bold text-slate-200">⭐ Support Prioritaire WhatsApp 24/7</li>
+                    <li class="flex items-center gap-2 font-bold text-indigo-400">🔥 2 mois offerts inclus !</li>
+                </ul>
+            </div>
+            <button @click="selectPlan({ id: 'yearly', name: 'Pack Premium' })" :disabled="loading" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 rounded-2xl font-black transition">
+                S'abonner maintenant
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Paiement & Justificatif -->
+    <div x-show="selectedPlan" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" style="display: none;" x-transition>
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h2 class="text-2xl font-black text-white mb-2">Instructions de paiement</h2>
+            <p class="text-slate-500 text-sm mb-6">Transférez le montant sur l'un des comptes ci-dessous pour activer votre pack <span class="text-white font-bold" x-text="selectedPlan?.name"></span>.</p>
+            
+            <div class="space-y-4 mb-6 text-left">
+                <template x-for="m in billing.payment_methods" :key="m.type">
+                    <div class="p-4 bg-slate-800 border border-slate-700 rounded-2xl">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400" x-text="m.label"></span>
+                            <span class="text-[10px] font-bold text-slate-500" x-text="m.owner"></span>
+                        </div>
+                        <div class="text-base font-black text-white select-all" x-text="m.account"></div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Paiement Automatique PayTech -->
+            <button @click="paytechBilling()" :disabled="loading" class="w-full mb-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-2xl font-black transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                <span x-show="!loading">⚡ Payer Automatiquement (Wave, OM, CB)</span>
+                <span x-show="loading">Redirection sécurisée...</span>
+            </button>
+
+            <!-- Formulaire d'envoi de justificatif de paiement -->
+            <div class="mt-2 pt-6 border-t border-slate-800 text-left">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Ou paiement manuel : Justificatif (Reçu Wave, Capture d'écran ou PDF)</label>
+                <div class="relative flex items-center justify-center border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-4 transition bg-slate-950/40">
+                    <input type="file" @change="handleProofUpload($event)" accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div class="text-center">
+                        <span class="text-2xl">📄</span>
+                        <div class="text-[11px] text-slate-400 font-bold mt-1" x-text="proofFilename || 'Sélectionner un reçu (Max 5Mo)'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button @click="selectedPlan = null; proofFile = null; proofFilename = '';" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl font-bold transition text-xs">Annuler</button>
+                <button @click="submitProof()" :disabled="!proofFile || loading" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl font-bold transition text-xs uppercase tracking-widest">
+                    <span x-show="!loading">Envoyer le reçu</span>
+                    <span x-show="loading">Envoi...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function billingApp() {
+    return {
+        user: null, billing: { status: 'loading', plans: [] }, showPlans: false, selectedPlan: null, loading: false, isExpired: false, isSuspect: false, isPendingApproval: false,
+        proofFile: null, proofFilename: '',
+        async init() {
+            const params = new URLSearchParams(window.location.search);
+            this.isExpired = params.get('expired') === 'true';
+            this.isSuspect = params.get('suspect') === 'true';
+            this.isPendingApproval = params.get('pending_approval') === 'true';
+            try {
+                const uRes = await apiFetch('/auth/me');
+                if (uRes) this.user = await uRes.json();
+                
+                const bRes = await apiFetch('/billing/status');
+                if (bRes) {
+                    this.billing = await bRes.json();
+                } else {
+                    this.billing = { status: 'inactif', plans: [] };
+                }
+            } catch(e) { 
+                console.error(e); 
+                this.billing = { status: 'erreur', plans: [] };
+            }
+        },
+        selectPlan(plan) { this.selectedPlan = plan; this.proofFile = null; this.proofFilename = ''; },
+        handleProofUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Le fichier est trop volumineux (maximum 5 Mo).');
+                return;
+            }
+            this.proofFilename = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.proofFile = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+        async submitProof() {
+            if (!this.proofFile) {
+                alert('Veuillez sélectionner un justificatif de paiement.');
+                return;
+            }
+            this.loading = true;
+            try {
+                const res = await apiFetch('/billing/submit-proof', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        planId: this.selectedPlan.id,
+                        method: 'wave_or_bank',
+                        proofFile: this.proofFile,
+                        proofFilename: this.proofFilename
+                    })
+                });
+                const d = await res.json();
+                if (res.ok) {
+                    alert('Justificatif envoyé avec succès ! Le créateur Alioune vérifie actuellement votre transfert. Votre accès sera activé sous 12h.');
+                    window.location.reload();
+                } else {
+                    alert(d.error || 'Erreur lors de l\'envoi.');
+                }
+            } catch(e) {
+                alert('Erreur réseau lors de l\'envoi du justificatif.');
+            } finally {
+                this.loading = false;
+                this.selectedPlan = null;
+            }
+        },
+        async paytechBilling() {
+            this.loading = true;
+            try {
+                const res = await apiFetch('/billing/paytech', {
+                    method: 'POST',
+                    body: JSON.stringify({ planId: this.selectedPlan.id })
+                });
+                const d = await res.json();
+                if (res.ok && d.redirect_url) {
+                    window.location.href = d.redirect_url;
+                } else {
+                    alert(d.error || 'Erreur lors de l\'initialisation du paiement automatique.');
+                }
+            } catch(e) {
+                alert('Erreur réseau lors de la communication avec le serveur.');
+            } finally {
+                this.loading = false;
+            }
+        },
+        formatDate(d) { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); }
+    }
+}
+</script>
+</body>
+</html>

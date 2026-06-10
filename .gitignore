@@ -1,0 +1,13 @@
+node_modules/
+.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.log
+backend/db/app.db
+backend/db/app.db-shm
+backend/db/app.db-wal
+backend/database.db
+backend/database.sqlite
+pwa_screenshots/
+screen_*.png
+superadmin_screen.png

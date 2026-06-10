@@ -1,0 +1,168 @@
+{
+  "id": "/?source=pwa",
+  "short_name": "SunuGestion",
+  "name": "Sunu Gestion — ERP & POS Sénégalais",
+  "description": "Gérez vos ventes, stocks, factures et clients en temps réel.",
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
+  "lang": "fr",
+  "dir": "ltr",
+  "scope": "/",
+  "iarc_rating_id": "123456",
+  "scope_extensions": [
+    {
+      "origin": "https://sunugestion.sn"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://sunugestion.sn/assets/icons/icon-192.png?v=2",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "https://sunugestion.sn/assets/icons/icon-192.png?v=2",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://sunugestion.sn/assets/icons/icon-512.png?v=2",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "https://sunugestion.sn/assets/icons/icon-512.png?v=2",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tableau de bord de Sunu Gestion"
+    },
+    {
+      "src": "/assets/screenshots/mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vitrine mobile de Sunu Gestion"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Factures",
+      "short_name": "Factures",
+      "description": "Gérer vos factures",
+      "url": "/invoices.html",
+      "icons": [
+        {
+          "src": "https://sunugestion.sn/assets/icons/icon-96.png?v=2",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Produits",
+      "short_name": "Produits",
+      "description": "Gérer votre stock de produits",
+      "url": "/products.html",
+      "icons": [
+        {
+          "src": "https://sunugestion.sn/assets/icons/icon-96.png?v=2",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=sn.sunugestion.app",
+      "id": "sn.sunugestion.app"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": [
+      "focus-existing",
+      "auto"
+    ]
+  },
+  "file_handlers": [
+    {
+      "action": "/index.html",
+      "name": "Export de données SunuGestion",
+      "accept": {
+        "application/json": [
+          ".json"
+        ]
+      },
+      "icons": [
+        {
+          "src": "https://sunugestion.sn/assets/icons/icon-96.png?v=2",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+sunugestion",
+      "url": "/index.html?uri=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "note_taking": {
+    "new_note_url": "/index.html?action=new-note"
+  },
+  "widgets": [
+    {
+      "name": "SunuGestion Mini",
+      "short_name": "Mini",
+      "description": "Vue rapide de vos ventes",
+      "tag": "sunugestion-widget",
+      "template": "widget-template",
+      "ms_ac_template": "widgets/widget.json",
+      "data": "widgets/data.json",
+      "type": "application/json",
+      "screenshots": [
+        {
+          "src": "/assets/screenshots/mobile.png",
+          "sizes": "750x1334",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

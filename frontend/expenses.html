@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépenses & Marges - Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}.glass{background:rgba(15,23,42,.85);backdrop-filter:blur(12px)}</style>
+    <link rel="stylesheet" href="/assets/css/print.css">
+    <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen" x-data="expensesApp()" x-init="init()">
+
+<!-- NAVBAR -->
+<nav class="glass border-b border-slate-800 sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-xl flex items-center justify-center"><span class="text-white font-extrabold text-lg">S</span></div>
+            <span class="text-lg font-extrabold text-white">Sunu <span class="text-indigo-400">Gestion</span></span>
+        </a>
+        <div class="hidden md:flex items-center gap-1">
+            <a href="/" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Dashboard</a>
+            <a href="/products.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Produits</a>
+            <a href="/pos.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-emerald-400 hover:bg-emerald-500/10 transition font-bold">Vente Rapide (POS)</a>
+            <a href="/invoices.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Factures</a>
+            <a href="/expenses.html" class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-slate-800 transition">Dépenses</a>
+            <a href="/visitors.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Visiteurs</a>
+            <a href="/suppliers.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Fournisseurs</a>
+            <a href="/files.html" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">Fichiers</a>
+        </div>
+        <button @click="logout()" class="text-slate-500 hover:text-red-400 transition text-sm font-medium">Déconnexion</button>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- En-tête -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-white">Dépenses & Marges</h1>
+            <p class="text-slate-500 mt-1">Comptabilité simplifiée — Bénéfice net en temps réel</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- Sélecteur de mois -->
+            <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2">
+                <select x-model="selectedMonth" @change="loadSummary()" class="bg-transparent text-white text-sm font-semibold focus:outline-none">
+                    <template x-for="(m, i) in months" :key="i">
+                        <option :value="i+1" x-text="m"></option>
+                    </template>
+                </select>
+                <select x-model="selectedYear" @change="loadSummary()" class="bg-transparent text-white text-sm font-semibold focus:outline-none">
+                    <template x-for="y in years" :key="y">
+                        <option :value="y" x-text="y"></option>
+                    </template>
+                </select>
+            </div>
+            <button @click="openModal()" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2">
+                <span class="text-lg">+</span> Ajouter une dépense
+            </button>
+        </div>
+    </div>
+
+    <!-- Résumé financier mensuel -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Revenus (Ventes payées) -->
+        <div class="bg-slate-900 border border-emerald-800/30 rounded-2xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl"></div>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wide">Revenus du mois</span>
+            </div>
+            <div class="text-2xl font-extrabold text-white" x-text="formatCFA(summary.total_sales || 0)"></div>
+            <div class="text-xs text-slate-500 mt-1">Factures encaissées</div>
+        </div>
+
+        <!-- Dépenses -->
+        <div class="bg-slate-900 border border-rose-800/30 rounded-2xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-xl"></div>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17H5m0 0v-8m0 8l8-8 4 4 6-6"></path></svg>
+                </div>
+                <span class="text-sm font-semibold text-rose-400 uppercase tracking-wide">Dépenses du mois</span>
+            </div>
+            <div class="text-2xl font-extrabold text-white" x-text="formatCFA(summary.total_expenses || 0)"></div>
+            <div class="text-xs text-slate-500 mt-1" x-text="(summary.expense_count || 0) + ' dépense(s) enregistrée(s)'"></div>
+        </div>
+
+        <!-- Bénéfice Net -->
+        <div class="bg-slate-900 rounded-2xl p-6 relative overflow-hidden border"
+             :class="(summary.net_profit || 0) >= 0 ? 'border-indigo-800/30' : 'border-red-800/50'">
+            <div class="absolute top-0 right-0 w-24 h-24 rounded-full blur-xl"
+                 :class="(summary.net_profit || 0) >= 0 ? 'bg-indigo-500/5' : 'bg-red-500/10'"></div>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                     :class="(summary.net_profit || 0) >= 0 ? 'bg-indigo-500/15' : 'bg-red-500/15'">
+                    <svg class="w-5 h-5" :class="(summary.net_profit || 0) >= 0 ? 'text-indigo-400' : 'text-red-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-sm font-semibold uppercase tracking-wide"
+                      :class="(summary.net_profit || 0) >= 0 ? 'text-indigo-400' : 'text-red-400'">Bénéfice Net</span>
+            </div>
+            <div class="text-2xl font-extrabold"
+                 :class="(summary.net_profit || 0) >= 0 ? 'text-white' : 'text-red-400'"
+                 x-text="formatCFA(summary.net_profit || 0)"></div>
+            <div class="text-xs text-slate-500 mt-1">Revenus − Dépenses</div>
+        </div>
+    </div>
+
+    <!-- Dépenses par catégorie -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" x-show="summary.by_category && summary.by_category.length > 0">
+        <div class="md:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <h3 class="font-bold text-white mb-4 text-sm uppercase tracking-wide">Par Catégorie</h3>
+            <div class="space-y-3">
+                <template x-for="cat in (summary.by_category || [])" :key="cat.category">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-300 font-medium" x-text="cat.category"></span>
+                        <span class="text-sm font-bold text-rose-400" x-text="formatCFA(cat.total)"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Liste des dépenses -->
+        <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800">
+                <h3 class="font-bold text-white">Toutes les dépenses</h3>
+            </div>
+            <div class="divide-y divide-slate-800 max-h-[400px] overflow-y-auto">
+                <template x-for="exp in expenses" :key="exp.id">
+                    <div class="px-6 py-4 flex items-center justify-between hover:bg-slate-800/50 transition">
+                        <div class="flex-1">
+                            <div class="font-semibold text-white" x-text="exp.label"></div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-bold" x-text="exp.category"></span>
+                                <span class="text-xs text-slate-500" x-text="formatDate(exp.expense_date)"></span>
+                            </div>
+                            <div x-show="exp.note" class="text-xs text-slate-500 italic mt-1" x-text="exp.note"></div>
+                        </div>
+                        <div class="flex items-center gap-3 ml-4">
+                            <span class="font-bold text-rose-400 text-sm" x-text="formatCFA(exp.amount)"></span>
+                            <button @click="deleteExpense(exp.id)" class="text-slate-600 hover:text-red-400 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="expenses.length === 0" class="py-12 text-center text-slate-600">
+                    Aucune dépense ce mois-ci. Cliquez sur "+ Ajouter une dépense" pour commencer.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- État vide -->
+    <div x-show="!summary.by_category || summary.by_category.length === 0" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-800">
+            <h3 class="font-bold text-white">Dépenses du mois</h3>
+        </div>
+        <div class="divide-y divide-slate-800">
+            <template x-for="exp in expenses" :key="exp.id">
+                <div class="px-6 py-4 flex items-center justify-between hover:bg-slate-800/50 transition">
+                    <div class="flex-1">
+                        <div class="font-semibold text-white" x-text="exp.label"></div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-bold" x-text="exp.category"></span>
+                            <span class="text-xs text-slate-500" x-text="formatDate(exp.expense_date)"></span>
+                        </div>
+                        <div x-show="exp.note" class="text-xs text-slate-500 italic mt-1" x-text="exp.note"></div>
+                    </div>
+                    <div class="flex items-center gap-3 ml-4">
+                        <span class="font-bold text-rose-400 text-sm" x-text="formatCFA(exp.amount)"></span>
+                        <button @click="deleteExpense(exp.id)" class="text-slate-600 hover:text-red-400 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+            <div x-show="expenses.length === 0" class="py-16 text-center">
+                <div class="text-slate-600 text-lg mb-2">📊 Aucune dépense ce mois-ci</div>
+                <p class="text-slate-700 text-sm">Ajoutez vos premières dépenses pour voir votre bénéfice net en temps réel.</p>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Modal Ajout Dépense -->
+<div x-show="showModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="showModal = false">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-8 shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
+                <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17H5m0 0v-8m0 8l8-8 4 4 6-6"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold text-white">Nouvelle dépense</h2>
+        </div>
+
+        <form @submit.prevent="createExpense()">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Libellé *</label>
+                    <input type="text" x-model="form.label" required placeholder="Ex: Loyer boutique Sandaga, Facture Senelec…" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-400 mb-1.5">Montant (FCFA) *</label>
+                        <input type="number" x-model="form.amount" required min="1" placeholder="15000" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-400 mb-1.5">Date *</label>
+                        <input type="date" x-model="form.expense_date" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Catégorie</label>
+                    <select x-model="form.category" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                        <option value="Loyer">🏪 Loyer / Local</option>
+                        <option value="Électricité">💡 Électricité (Senelec)</option>
+                        <option value="Salaires">👥 Salaires employés</option>
+                        <option value="Transport">🚗 Transport / Livraison</option>
+                        <option value="Stock">📦 Achat de stock</option>
+                        <option value="Marketing">📢 Marketing / Publicité</option>
+                        <option value="Téléphone">📱 Téléphone / Internet</option>
+                        <option value="Eau">💧 Eau (SDE)</option>
+                        <option value="Autre">📋 Autre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-400 mb-1.5">Note (optionnel)</label>
+                    <textarea x-model="form.note" rows="2" placeholder="Précisions supplémentaires…" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 transition resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8 justify-end">
+                <button type="button" @click="showModal = false" class="px-5 py-2.5 rounded-xl font-semibold text-sm text-slate-400 hover:bg-slate-800 transition">Annuler</button>
+                <button type="submit" :disabled="loading" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 disabled:opacity-50">
+                    <span x-text="loading ? 'Enregistrement...' : '✓ Enregistrer la dépense'"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function expensesApp() {
+    const now = new Date();
+    return {
+        expenses: [],
+        summary: {},
+        showModal: false,
+        loading: false,
+        selectedMonth: now.getMonth() + 1,
+        selectedYear: now.getFullYear(),
+        months: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+        years: Array.from({length: 5}, (_, i) => now.getFullYear() - i),
+        form: { label: '', amount: '', category: 'Loyer', expense_date: now.toISOString().split('T')[0], note: '' },
+
+        async init() {
+            if (!requireAuth()) return;
+            await Promise.all([this.loadExpenses(), this.loadSummary()]);
+        },
+
+        async loadExpenses() {
+            const res = await apiFetch('/expenses');
+            if (res?.ok) this.expenses = await res.json();
+        },
+
+        async loadSummary() {
+            const res = await apiFetch(`/expenses/summary?month=${this.selectedMonth}&year=${this.selectedYear}`);
+            if (res?.ok) this.summary = await res.json();
+        },
+
+        openModal() {
+            this.form = { label: '', amount: '', category: 'Loyer', expense_date: new Date().toISOString().split('T')[0], note: '' };
+            this.showModal = true;
+        },
+
+        async createExpense() {
+            this.loading = true;
+            try {
+                const res = await apiFetch('/expenses', {
+                    method: 'POST',
+                    body: JSON.stringify(this.form)
+                });
+                if (res?.ok) {
+                    this.showModal = false;
+                    await Promise.all([this.loadExpenses(), this.loadSummary()]);
+                    showToast('✅ Dépense enregistrée !', 'success');
+                } else {
+                    const d = await res?.json();
+                    showToast(d?.error || '❌ Erreur lors de l\'enregistrement.', 'error');
+                }
+            } catch(e) {
+                showToast('❌ Erreur réseau.', 'error');
+            }
+            this.loading = false;
+        },
+
+        async deleteExpense(id) {
+            if (!confirm('Supprimer définitivement cette dépense ?')) return;
+            const res = await apiFetch(`/expenses/${id}`, { method: 'DELETE' });
+            if (res?.ok) {
+                await Promise.all([this.loadExpenses(), this.loadSummary()]);
+                showToast('🗑️ Dépense supprimée.', 'success');
+            } else {
+                showToast('❌ Impossible de supprimer.', 'error');
+            }
+        },
+
+        formatCFA(v) {
+            const sign = v < 0 ? '-' : '';
+            return sign + new Intl.NumberFormat('fr-FR').format(Math.abs(v)) + ' FCFA';
+        },
+        formatDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR') : '—'; },
+        logout() { localStorage.clear(); window.location.href = '/login.html'; }
+    }
+}
+</script>
+<script src="/assets/js/calculator.js"></script>
+</body>
+</html>

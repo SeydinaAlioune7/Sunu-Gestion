@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarifs — Sunu Gestion | Abonnement Logiciel de Gestion Sénégal</title>
+    <meta name="description" content="Découvrez les tarifs de Sunu Gestion. 5 000 F CFA/mois pour gérer votre entreprise : produits, ventes, factures, stocks et vitrine en ligne. Sans engagement.">
+    <meta name="keywords" content="tarif logiciel gestion, prix ERP Sénégal, abonnement gestion commerciale, facturation PME Dakar, logiciel caisse Afrique">
+    <meta name="author" content="Alioune Badara Ibn Abu Talib Diene">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.sunugestion.sn/pricing.html">
+    <meta property="og:title" content="Tarifs Sunu Gestion — 5 000 F CFA/mois Tout Inclus">
+    <meta property="og:description" content="Un seul abonnement pour gérer toute votre entreprise : stock, ventes, factures, caisse, vitrine. Annulable à tout moment.">
+    <meta property="og:url" content="https://www.sunugestion.sn/pricing.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_SN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Tarifs Sunu Gestion — Logiciel de Gestion Sénégal">
+    <meta name="twitter:description" content="5 000 F CFA/mois pour gérer votre commerce. Sans engagement, annulable à tout moment.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}</style>
+    <link rel="stylesheet" href="/assets/css/print.css">
+    <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body class="bg-slate-950 min-h-screen text-slate-200" x-data="pricingApp()" x-init="init()">
+
+<!-- NAVBAR -->
+<nav class="border-b border-slate-800 sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-xl flex items-center justify-center"><span class="text-white font-extrabold text-lg">S</span></div>
+            <span class="text-lg font-extrabold text-white">Sunu <span class="text-indigo-400">Gestion</span></span>
+        </a>
+        <div class="flex items-center gap-3">
+            <template x-if="isLoggedIn">
+                <div class="flex items-center gap-3">
+                    <a href="/" class="text-sm text-slate-400 hover:text-white font-semibold">Dashboard</a>
+                    <button @click="logout()" class="text-slate-500 hover:text-red-400 text-sm font-medium">D�connexion</button>
+                </div>
+            </template>
+            <template x-if="!isLoggedIn">
+                <div class="flex items-center gap-3">
+                    <a href="/login.html" class="text-sm text-slate-400 hover:text-white font-semibold">Connexion</a>
+                    <a href="/register.html" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition">Essai gratuit</a>
+                </div>
+            </template>
+        </div>
+    </div>
+</nav>
+
+<!-- Banni�re expiration -->
+<div x-show="expired" class="bg-red-500/10 border-b border-red-500/30 py-4 text-center">
+    <p class="text-red-400 font-bold">⏰ Votre p�riode d'essai est termin�e. Souscrivez pour continuer.</p>
+</div>
+
+<main class="max-w-5xl mx-auto px-4 py-20 text-center">
+    <!-- Header -->
+    <span class="text-indigo-400 font-bold tracking-wider uppercase text-sm">Tarification simple et transparente</span>
+    <h1 class="text-5xl font-extrabold text-white mt-4 mb-4">Un plan. Tout inclus.</h1>
+            <button @click="window.print()" class="mt-4 no-print flex items-center gap-2 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition border border-indigo-500/30"><span>?</span> Imprimer en Couleur</button>
+    <p class="text-slate-400 text-xl max-w-2xl mx-auto mb-10">Pas de surprise, pas de frais cach�s. Tout ce dont votre entreprise a besoin pour grandir.</p>
+
+    <!-- S�lecteur Devise -->
+    <div class="flex justify-center mb-12">
+        <div class="bg-slate-900 border border-slate-800 p-1 rounded-2xl flex gap-1">
+            <button @click="currency = 'CFA'" 
+                class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all"
+                :class="currency === 'CFA' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'">
+                🇸🇳 Franc CFA
+            </button>
+            <button @click="currency = 'EUR'" 
+                class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all"
+                :class="currency === 'EUR' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'">
+                🇪🇺 Euro (€)
+            </button>
+        </div>
+    </div>
+
+    <!-- Carte Prix -->
+    <div class="max-w-lg mx-auto">
+        <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-indigo-500/30 rounded-3xl p-10 relative overflow-hidden transition-all duration-300 hover:border-indigo-500/60 shadow-2xl">
+            <!-- Badge -->
+            <div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-2xl">POPULAIRE</div>
+
+            <h2 class="text-2xl font-bold text-white mb-2">Entreprise</h2>
+            
+            <!-- Prix -->
+            <div class="flex items-baseline justify-center gap-1 mb-8 transition-all">
+                <span class="text-6xl font-extrabold text-white" x-text="currency === 'CFA' ? '5 000' : '7.5'"></span>
+                <div class="text-left">
+                    <span class="text-slate-400 text-lg font-bold" x-text="currency === 'CFA' ? 'F CFA' : '€'"></span>
+                    <div class="text-slate-500 text-sm">/ mois</div>
+                </div>
+            </div>
+
+            <ul class="text-left space-y-4 mb-10">
+                <li class="flex items-center gap-3 text-slate-300">
+                    <span class="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                    Sites commerciaux <strong class="text-white ml-1">illimit�s</strong>
+                </li>
+                <li class="flex items-center gap-3 text-slate-300">
+                    <span class="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                    Utilisateurs <strong class="text-white ml-1">illimit�s</strong>
+                </li>
+                <li class="flex items-center gap-3 text-slate-300">
+                    <span class="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                    Stockage <strong class="text-white ml-1">15 Go crypt� AES-256</strong>
+                </li>
+                <li class="flex items-center gap-3 text-slate-300">
+                    <span class="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                    Produits & factures <strong class="text-white ml-1">illimit�s</strong>
+                </li>
+                <li class="flex items-center gap-3 text-slate-300">
+                    <span class="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                    Gestion de stock <strong class="text-white ml-1">compl�te</strong>
+                </li>
+                <li class="flex items-center gap-3 text-slate-300">
+                    <span class="w-6 h-6 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                    Assistant intelligent <strong class="text-white ml-1">IA inclus</strong>
+                </li>
+            </ul>
+
+            <template x-if="isLoggedIn">
+                <div class="space-y-4">
+                    <button x-show="currency === 'CFA'" @click="subscribe('mobile_money')" :disabled="subLoading"
+                        class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white py-4 rounded-2xl font-extrabold text-lg shadow-lg shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 disabled:opacity-50">
+                        <span x-text="subLoading ? 'Traitement...' : 'Payer via Mobile Money'"></span>
+                    </button>
+                    
+                    <button x-show="currency === 'EUR'" @click="subscribe('stripe')" :disabled="subLoading"
+                        class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white py-4 rounded-2xl font-extrabold text-lg shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 disabled:opacity-50">
+                        <span x-text="subLoading ? 'Redirection...' : 'Payer par Carte (Stripe)'"></span>
+                    </button>
+                </div>
+            </template>
+            <template x-if="!isLoggedIn">
+                <a href="/register.html"
+                    class="block w-full bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white py-4 rounded-2xl font-extrabold text-lg shadow-lg shadow-emerald-500/25 transition-all transform hover:-translate-y-0.5 text-center">
+                    D�marrer l'essai de 7 jours →
+                </a>
+            </template>
+
+            <p class="text-slate-500 text-xs mt-6">Annulable � tout moment. Aucun engagement.</p>
+        </div>
+    </div>
+
+    <!-- Logos partenaires -->
+    <div class="mt-20">
+        <p class="text-slate-600 text-sm mb-6">Paiement s�curis� avec vos moyens pr�f�r�s</p>
+        <div class="flex justify-center items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
+            <div class="text-2xl font-bold tracking-tight">🌊 Wave</div>
+            <div class="text-2xl font-bold text-orange-500 tracking-tight">Orange Money</div>
+            <div class="text-2xl font-bold tracking-tight">💳 Stripe</div>
+        </div>
+        <p class="text-slate-700 text-xs mt-8">© 2026 Alioune Badara Diene Gestion. Tous droits r�serv�s.</p>
+    </div>
+</main>
+
+<!-- Modal Simulation Mobile Money -->
+<div x-show="showMMModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" style="display: none;">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-8 text-center relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+        
+        <div class="text-5xl mb-6">📱</div>
+        <h3 class="text-2xl font-bold text-white mb-2">Paiement Mobile</h3>
+        <p class="text-slate-400 text-sm mb-8">Simulation de l'interface Wave / Orange Money</p>
+        
+        <div class="bg-slate-800 rounded-2xl p-4 mb-8 text-left">
+            <div class="text-sm text-slate-400 mb-1">Montant � payer</div>
+            <div class="text-3xl font-extrabold text-white">5 000 F CFA</div>
+        </div>
+        
+        <button @click="confirmMobileMoney()" :disabled="mmLoading"
+            class="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-1">
+            <span x-text="mmLoading ? 'Validation...' : '✓ Valider le paiement'"></span>
+        </button>
+        <button @click="showMMModal = false" class="w-full mt-4 text-slate-500 hover:text-white font-semibold text-sm transition">
+            Annuler
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
+<script src="/assets/js/api.js"></script>
+<script>
+function pricingApp() {
+    return {
+        isLoggedIn: false, expired: false, subLoading: false,
+        currency: 'CFA', showMMModal: false, mmLoading: false,
+        init() {
+            this.isLoggedIn = !!getToken();
+            const params = new URLSearchParams(window.location.search);
+            this.expired = params.get('expired') === 'true';
+        },
+        async subscribe(method) {
+            if (method === 'mobile_money') {
+                this.showMMModal = true;
+                return;
+            }
+            
+            // Stripe
+            this.subLoading = true;
+            const res = await apiFetch('/subscriptions/create-checkout', { 
+                method: 'POST',
+                body: JSON.stringify({ method: 'stripe', currency: 'eur' })
+            });
+            if (res?.ok) {
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+                else alert(data.message || 'Contactez l\'administrateur pour souscrire.');
+            } else {
+                const d = await res?.json();
+                alert(d?.error || d?.message || 'Erreur.');
+            }
+            this.subLoading = false;
+        },
+        async confirmMobileMoney() {
+            this.mmLoading = true;
+            // Simulation d'un d�lai r�seau pour l'UX
+            await new Promise(r => setTimeout(r, 1500));
+            
+            const res = await apiFetch('/subscriptions/create-checkout', { 
+                method: 'POST',
+                body: JSON.stringify({ method: 'mobile_money', currency: 'cfa' })
+            });
+            
+            this.mmLoading = false;
+            if (res?.ok) {
+                this.showMMModal = false;
+                window.location.href = '/index.html?success=true';
+            } else {
+                alert('Erreur lors de la validation du paiement.');
+            }
+        }
+    }
+}
+</script>
+<script src="/assets/js/calculator.js"></script>
+<script src="/assets/js/calculator.js"></script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dropshipping – SunuGestion</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --p:#6C63FF;--pd:#4f46e5;--pl:#eeecff;
+  --ok:#16a34a;--okl:#dcfce7;--err:#dc2626;--errl:#fee2e2;
+  --warn:#d97706;--warnl:#fef3c7;
+  --s0:#fff;--s1:#f8f8fc;--s2:#f0f0f8;--s3:#e2e2ef;
+  --b:rgba(0,0,0,0.08);--t1:#111;--t2:#555;--t3:#999;
+  --r:10px;--rs:6px
+}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--s1);color:var(--t1);min-height:100vh}
+
+/* NAV */
+.topbar{background:var(--s0);border-bottom:1px solid var(--b);padding:0 24px;display:flex;align-items:center;gap:16px;height:56px}
+.topbar a{font-size:13px;color:var(--t2);text-decoration:none;display:flex;align-items:center;gap:6px}
+.topbar a:hover{color:var(--p)}
+.topbar-title{font-size:15px;font-weight:700;color:var(--t1);margin-left:auto}
+.badge-status{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-status.on{background:var(--okl);color:var(--ok)}
+.badge-status.off{background:var(--s2);color:var(--t3)}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--b);background:var(--s0);padding:0 24px}
+.tab{padding:14px 20px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;display:flex;align-items:center;gap:7px}
+.tab.on{color:var(--p);border-color:var(--p);font-weight:600}
+.tab:hover:not(.on){color:var(--t1)}
+.tab-badge{background:var(--p);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;font-weight:700}
+
+/* PAGES */
+.page{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.page.on{display:block}
+
+/* CARDS */
+.card{background:var(--s0);border:1px solid var(--b);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* FORM */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:5px}
+.field input,.field select{width:100%;padding:9px 12px;border:1px solid var(--b);border-radius:var(--rs);font-size:13px;font-family:inherit;background:var(--s0);color:var(--t1);outline:none;transition:.15s}
+.field input:focus,.field select:focus{border-color:var(--p)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border:none;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--p);color:#fff}.btn-p:hover{background:var(--pd)}
+.btn-o{background:none;border:1px solid var(--b);color:var(--t1)}.btn-o:hover{border-color:var(--p);color:var(--p)}
+.btn-err{background:var(--errl);color:var(--err)}.btn-err:hover{background:#fecaca}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* SEARCH BAR */
+.search-row{display:flex;gap:10px;margin-bottom:20px;align-items:center}
+.search-row input{flex:1;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:13.5px;font-family:inherit;outline:none;transition:.15s}
+.search-row input:focus{border-color:var(--p)}
+
+/* PRODUCT GRID */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.prod-card{background:var(--s0);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;transition:.15s}
+.prod-card:hover{border-color:var(--p);box-shadow:0 2px 12px rgba(108,99,255,.1)}
+.prod-img{width:100%;height:160px;object-fit:cover;background:var(--s2)}
+.prod-img-placeholder{width:100%;height:160px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:36px}
+.prod-body{padding:12px}
+.prod-name{font-size:12.5px;font-weight:600;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-price{font-size:11px;color:var(--t2);margin-bottom:10px}
+.prod-price strong{color:var(--ok);font-size:13px}
+.prod-actions{display:flex;gap:6px}
+.prod-actions .btn{flex:1;font-size:11px;padding:6px 8px;justify-content:center}
+
+/* IMPORT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-overlay.on{display:flex}
+.modal{background:var(--s0);border-radius:var(--r);padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:18px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--b)}
+td{padding:10px 12px;border-bottom:1px solid var(--b);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:var(--s1)}
+
+/* STATUS PILLS */
+.pill{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--okl);color:var(--ok)}
+.pill.err{background:var(--errl);color:var(--err)}
+.pill.warn{background:var(--warnl);color:var(--warn)}
+.pill.grey{background:var(--s2);color:var(--t2)}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:var(--rs);font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.alert.info{background:var(--pl);color:var(--pd)}
+.alert.ok{background:var(--okl);color:var(--ok)}
+.alert.err{background:var(--errl);color:var(--err)}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:var(--t3)}
+.empty-icon{font-size:42px;margin-bottom:12px}
+.empty p{font-size:14px}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px}
+.pagination .btn{padding:6px 14px;font-size:12px}
+.page-info{font-size:12px;color:var(--t2)}
+
+@media(max-width:600px){
+  .row2{grid-template-columns:1fr}
+  .tabs{padding:0 12px;overflow-x:auto}
+  .tab{padding:12px 14px;font-size:12px}
+  .page{padding:16px 12px}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="/dashboard.html">← Tableau de bord</a>
+  <div class="topbar-title">📦 Dropshipping CJDropshipping</div>
+  <span class="badge-status off" id="connBadge">Non connecté</span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on" data-tab="config">⚙️ Configuration</div>
+  <div class="tab" data-tab="catalog">🔍 Catalogue CJ</div>
+  <div class="tab" data-tab="imported">📋 Mes produits <span class="tab-badge" id="importedCount">0</span></div>
+  <div class="tab" data-tab="orders">🚚 Commandes <span class="tab-badge" id="ordersCount">0</span></div>
+</div>
+
+<!-- PAGE CONFIG -->
+<div class="page on" id="page-config">
+  <div class="card">
+    <div class="card-title">🔗 Connexion CJDropshipping</div>
+    <div class="alert info">Créez un compte gratuit sur <strong>cjdropshipping.com</strong>, puis entrez vos identifiants ci-dessous. Vos commandes seront traitées automatiquement dès qu'un paiement est confirmé.</div>
+    <div id="configForm">
+      <div class="row2">
+        <div class="field">
+          <label>Email CJDropshipping</label>
+          <input type="email" id="cjEmail" placeholder="votre@email.com">
+        </div>
+        <div class="field">
+          <label>Mot de passe CJDropshipping</label>
+          <input type="password" id="cjPassword" placeholder="••••••••">
+        </div>
+      </div>
+      <div class="field">
+        <label>
+          <input type="checkbox" id="autoOrder" checked style="margin-right:6px">
+          Passer les commandes CJ automatiquement après chaque paiement confirmé
+        </label>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-p" id="connectBtn">🔌 Connecter le compte</button>
+        <button class="btn btn-err" id="disconnectBtn" style="display:none">🗑 Déconnecter</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 Comment ça marche</div>
+    <div style="display:grid;gap:12px;font-size:13px;color:var(--t2);line-height:1.6">
+      <div><strong style="color:var(--t1)">1. Connectez votre compte CJ</strong><br>Entrez vos identifiants CJDropshipping. Le token est sauvegardé et renouvelé automatiquement.</div>
+      <div><strong style="color:var(--t1)">2. Importez des produits</strong><br>Cherchez dans le catalogue CJ, fixez votre prix de vente, importez dans votre vitrine.</div>
+      <div><strong style="color:var(--t1)">3. Vendez sans stock</strong><br>Quand un client paie sur votre vitrine, la commande est envoyée automatiquement chez CJ qui expédie directement au client.</div>
+      <div><strong style="color:var(--t1)">4. Suivez vos commandes</strong><br>Consultez le statut et le numéro de tracking dans l'onglet Commandes.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE CATALOGUE -->
+<div class="page" id="page-catalog">
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Rechercher un produit CJDropshipping... (ex: phone case, led lamp)">
+    <button class="btn btn-p" id="searchBtn">🔍 Rechercher</button>
+  </div>
+
+  <div id="catalogAlert"></div>
+  <div class="product-grid" id="productGrid"></div>
+  <div class="empty" id="catalogEmpty" style="display:none">
+    <div class="empty-icon">🔍</div>
+    <p>Aucun produit trouvé.<br>Essayez un autre mot-clé.</p>
+  </div>
+  <div class="pagination" id="pagination" style="display:none">
+    <button class="btn btn-o" id="prevPage">← Précédent</button>
+    <span class="page-info" id="pageInfo"></span>
+    <button class="btn btn-o" id="nextPage">Suivant →</button>
+  </div>
+</div>
+
+<!-- PAGE IMPORTED -->
+<div class="page" id="page-imported">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Prix achat CJ</th>
+          <th>Prix vente vitrine</th>
+          <th>Marge</th>
+          <th>Importé le</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="importedBody">
+        <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--t3)">Chargement...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PAGE COMMANDES -->
+<div class="page" id="page-orders">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Facture</th>
+          <th>Client</th>
+          <th>Commande CJ</th>
+          <th>Statut</th>
+          <th>Tracking</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody">
+        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--t3)">Chargement...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL IMPORT -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-title">📥 Importer ce produit</div>
+    <input type="hidden" id="impPid">
+    <input type="hidden" id="impVid">
+    <div class="field">
+      <label>Nom du produit</label>
+      <input type="text" id="impName">
+    </div>
+    <div class="field">
+      <label>Variante sélectionnée</label>
+      <select id="impVariant"></select>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Prix achat CJ (XOF)</label>
+        <input type="number" id="impCost" readonly style="background:var(--s2)">
+      </div>
+      <div class="field">
+        <label>Frais de livraison (XOF)</label>
+        <input type="number" id="impShipping" value="0" readonly style="background:var(--s2)">
+      </div>
+    </div>
+    <div class="field">
+      <label>⭐ Votre prix de vente (XOF)</label>
+      <input type="number" id="impSell" placeholder="Ex: 15000">
+    </div>
+    <div class="field" id="impMarginInfo" style="font-size:12px;color:var(--t2)"></div>
+    <div class="modal-footer">
+      <button class="btn btn-o" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-p" id="confirmImport">✅ Importer dans ma vitrine</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('token') || '';
+let currentPage = 1;
+let totalPages = 1;
+let currentProducts = [];
+
+const authHeaders = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` });
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    document.getElementById(`page-${t.dataset.tab}`).classList.add('on');
+    if (t.dataset.tab === 'imported') loadImported();
+    if (t.dataset.tab === 'orders') loadOrders();
+  };
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  await loadConfig();
+  await loadImported();
+  await loadOrders();
+}
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+async function loadConfig() {
+  try {
+    const r = await fetch(`${API}/dropshipping/config`, { headers: authHeaders() });
+    const d = await r.json();
+    const badge = document.getElementById('connBadge');
+    if (d.connected) {
+      badge.textContent = `✅ ${d.email}`;
+      badge.className = 'badge-status on';
+      document.getElementById('cjEmail').value = d.email || '';
+      document.getElementById('autoOrder').checked = !!d.auto_order;
+      document.getElementById('disconnectBtn').style.display = '';
+    } else {
+      badge.textContent = 'Non connecté';
+      badge.className = 'badge-status off';
+      document.getElementById('disconnectBtn').style.display = 'none';
+    }
+  } catch (e) { console.error(e); }
+}
+
+document.getElementById('connectBtn').onclick = async () => {
+  const email = document.getElementById('cjEmail').value.trim();
+  const password = document.getElementById('cjPassword').value;
+  const auto_order = document.getElementById('autoOrder').checked ? 1 : 0;
+  if (!email || !password) return alert('Email et mot de passe requis.');
+
+  const btn = document.getElementById('connectBtn');
+  btn.disabled = true; btn.textContent = 'Connexion...';
+  try {
+    const r = await fetch(`${API}/dropshipping/config`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ email, password, auto_order })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    alert('✅ ' + d.message);
+    await loadConfig();
+  } catch (e) {
+    alert('❌ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '🔌 Connecter le compte';
+  }
+};
+
+document.getElementById('disconnectBtn').onclick = async () => {
+  if (!confirm('Déconnecter le compte CJDropshipping ?')) return;
+  await fetch(`${API}/dropshipping/config`, { method: 'DELETE', headers: authHeaders() });
+  await loadConfig();
+};
+
+// ── CATALOGUE ─────────────────────────────────────────────────────────────────
+document.getElementById('searchBtn').onclick = () => { currentPage = 1; searchProducts(); };
+document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') { currentPage = 1; searchProducts(); } });
+document.getElementById('prevPage').onclick = () => { if (currentPage > 1) { currentPage--; searchProducts(); } };
+document.getElementById('nextPage').onclick = () => { if (currentPage < totalPages) { currentPage++; searchProducts(); } };
+
+async function searchProducts() {
+  const q = document.getElementById('searchInput').value.trim();
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('catalogEmpty');
+  const pagination = document.getElementById('pagination');
+  const alertEl = document.getElementById('catalogAlert');
+
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--t3)">Recherche en cours...</div>';
+  empty.style.display = 'none';
+  pagination.style.display = 'none';
+  alertEl.innerHTML = '';
+
+  try {
+    const r = await fetch(`${API}/dropshipping/products?q=${encodeURIComponent(q)}&page=${currentPage}`, {
+      headers: authHeaders()
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+
+    const products = d.list || [];
+    currentProducts = products;
+    totalPages = Math.ceil((d.total || 0) / 20);
+
+    if (!products.length) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+
+    grid.innerHTML = products.map(p => {
+      const price = p.sellPrice || p.productPrice || 0;
+      const priceXOF = Math.round(price * 655); // USD → XOF
+      const img = p.productImage || '';
+      return `
+        <div class="prod-card">
+          ${img ? `<img class="prod-img" src="${img}" alt="${p.productName}" loading="lazy">` : `<div class="prod-img-placeholder">📦</div>`}
+          <div class="prod-body">
+            <div class="prod-name">${p.productName}</div>
+            <div class="prod-price">Prix CJ : <strong>${priceXOF.toLocaleString('fr-FR')} XOF</strong></div>
+            <div class="prod-actions">
+              <button class="btn btn-p" onclick="openImport('${p.pid}', '${escHtml(p.productName)}', ${price})">+ Importer</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    if (totalPages > 1) {
+      pagination.style.display = 'flex';
+      document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages}`;
+      document.getElementById('prevPage').disabled = currentPage <= 1;
+      document.getElementById('nextPage').disabled = currentPage >= totalPages;
+    }
+  } catch (e) {
+    grid.innerHTML = '';
+    alertEl.innerHTML = `<div class="alert err">❌ ${e.message}</div>`;
+  }
+}
+
+function escHtml(s) { return (s||'').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+// ── MODAL IMPORT ──────────────────────────────────────────────────────────────
+async function openImport(pid, name, priceUSD) {
+  document.getElementById('impPid').value = pid;
+  document.getElementById('impName').value = name;
+  const priceXOF = Math.round(priceUSD * 655);
+  document.getElementById('impCost').value = priceXOF;
+  document.getElementById('impSell').value = Math.round(priceXOF * 2.2);
+  document.getElementById('impShipping').value = 2000;
+
+  // Charger les variantes
+  const variantSel = document.getElementById('impVariant');
+  variantSel.innerHTML = '<option>Chargement...</option>';
+  document.getElementById('importModal').classList.add('on');
+
+  try {
+    const r = await fetch(`${API}/dropshipping/product/${pid}`, { headers: authHeaders() });
+    const d = await r.json();
+    const variants = d.variants || d.productVariants || [];
+    if (variants.length) {
+      variantSel.innerHTML = variants.map(v => {
+        const vPrice = Math.round((v.variantSellPrice || v.sellPrice || priceUSD) * 655);
+        return `<option value="${v.vid}" data-price="${vPrice}">${v.variantProperty || v.sku || v.vid} — ${vPrice.toLocaleString('fr-FR')} XOF</option>`;
+      }).join('');
+
+      variantSel.onchange = () => {
+        const opt = variantSel.selectedOptions[0];
+        document.getElementById('impCost').value = opt.dataset.price || priceXOF;
+        updateMargin();
+      };
+      variantSel.dispatchEvent(new Event('change'));
+    } else {
+      variantSel.innerHTML = `<option value="${pid}">Variante unique</option>`;
+      document.getElementById('impVid').value = pid;
+    }
+  } catch (e) {
+    variantSel.innerHTML = `<option value="${pid}">Variante unique</option>`;
+    document.getElementById('impVid').value = pid;
+  }
+
+  document.getElementById('impSell').oninput = updateMargin;
+  updateMargin();
+}
+
+function updateMargin() {
+  const cost = parseFloat(document.getElementById('impCost').value) || 0;
+  const ship = parseFloat(document.getElementById('impShipping').value) || 0;
+  const sell = parseFloat(document.getElementById('impSell').value) || 0;
+  const margin = sell - cost - ship;
+  const pct = cost ? Math.round((margin / sell) * 100) : 0;
+  const el = document.getElementById('impMarginInfo');
+  el.innerHTML = margin > 0
+    ? `✅ Marge : <strong>${margin.toLocaleString('fr-FR')} XOF</strong> (${pct}%)`
+    : `⚠️ Prix de vente trop bas — votre marge est négative.`;
+  el.style.color = margin > 0 ? 'var(--ok)' : 'var(--err)';
+}
+
+function closeModal() {
+  document.getElementById('importModal').classList.remove('on');
+}
+
+document.getElementById('importModal').onclick = function(e) {
+  if (e.target === this) closeModal();
+};
+
+document.getElementById('confirmImport').onclick = async () => {
+  const variantSel = document.getElementById('impVariant');
+  const vid = variantSel.selectedOptions[0]?.value || document.getElementById('impVid').value;
+  const cost = parseFloat(document.getElementById('impCost').value) || 0;
+  const ship = parseFloat(document.getElementById('impShipping').value) || 0;
+  const sell = parseFloat(document.getElementById('impSell').value) || 0;
+
+  if (!vid) return alert('Sélectionnez une variante.');
+  if (sell <= 0) return alert('Entrez un prix de vente valide.');
+  if (sell < cost) return alert('Le prix de vente doit être supérieur au prix d\'achat.');
+
+  const btn = document.getElementById('confirmImport');
+  btn.disabled = true; btn.textContent = 'Import en cours...';
+
+  try {
+    const r = await fetch(`${API}/dropshipping/import`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        cj_product_id: document.getElementById('impPid').value,
+        cj_variant_id: vid,
+        cj_product_name: document.getElementById('impName').value,
+        cost_price: cost,
+        shipping_cost: ship,
+        selling_price: sell
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    alert('✅ ' + d.message);
+    closeModal();
+    await loadImported();
+    document.getElementById('importedCount').textContent = await getImportedCount();
+  } catch (e) {
+    alert('❌ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ Importer dans ma vitrine';
+  }
+};
+
+// ── IMPORTED ──────────────────────────────────────────────────────────────────
+async function loadImported() {
+  try {
+    const r = await fetch(`${API}/dropshipping/imported`, { headers: authHeaders() });
+    const rows = await r.json();
+    document.getElementById('importedCount').textContent = rows.length;
+
+    const tbody = document.getElementById('importedBody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>Aucun produit importé.<br>Allez dans Catalogue pour importer vos premiers produits.</p></div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(p => {
+      const cost = (p.cost_price + p.shipping_cost).toLocaleString('fr-FR');
+      const sell = parseFloat(p.price).toLocaleString('fr-FR');
+      const margin = (p.price - p.cost_price - p.shipping_cost);
+      const pct = p.cost_price ? Math.round((margin / p.price) * 100) : 0;
+      return `<tr>
+        <td><strong>${p.name}</strong><br><span style="font-size:11px;color:var(--t3)">${p.cj_product_id}</span></td>
+        <td>${cost} XOF</td>
+        <td>${sell} XOF</td>
+        <td><span class="pill ${pct > 20 ? 'ok' : pct > 0 ? 'warn' : 'err'}">${pct}%</span></td>
+        <td style="font-size:11px;color:var(--t3)">${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
+        <td><button class="btn btn-err" style="font-size:11px;padding:4px 10px" onclick="deleteImported(${p.id}, '${escHtml(p.name)}')">🗑</button></td>
+      </tr>`;
+    }).join('');
+  } catch (e) { console.error(e); }
+}
+
+async function getImportedCount() {
+  const r = await fetch(`${API}/dropshipping/imported`, { headers: authHeaders() });
+  const rows = await r.json();
+  return rows.length;
+}
+
+async function deleteImported(id, name) {
+  if (!confirm(`Supprimer "${name}" de votre catalogue ?`)) return;
+  await fetch(`${API}/dropshipping/imported/${id}`, { method: 'DELETE', headers: authHeaders() });
+  await loadImported();
+  document.getElementById('importedCount').textContent = await getImportedCount();
+}
+
+// ── COMMANDES ─────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  try {
+    const r = await fetch(`${API}/dropshipping/orders`, { headers: authHeaders() });
+    const rows = await r.json();
+    document.getElementById('ordersCount').textContent = rows.length;
+
+    const tbody = document.getElementById('ordersBody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">🚚</div><p>Aucune commande dropshipping pour l\'instant.<br>Les commandes apparaissent automatiquement après chaque paiement confirmé.</p></div></td></tr>';
+      return;
+    }
+
+    const statusMap = {
+      created: ['warn','En attente CJ'],
+      pending: ['warn','En attente'],
+      processing: ['warn','En traitement'],
+      shipped: ['ok','Expédié'],
+      delivered: ['ok','Livré'],
+      error: ['err','Erreur'],
+      cancelled: ['err','Annulé']
+    };
+
+    tbody.innerHTML = rows.map(o => {
+      const [cls, label] = statusMap[o.status] || ['grey', o.status];
+      return `<tr>
+        <td><strong>${o.invoice_number || '—'}</strong></td>
+        <td>${o.client_name || '—'}</td>
+        <td><span style="font-size:11px;font-family:monospace">${o.cj_order_id || '—'}</span></td>
+        <td><span class="pill ${cls}">${label}</span></td>
+        <td style="font-size:11px">${o.tracking_number || (o.error_message ? `<span style="color:var(--err)">${o.error_message}</span>` : '—')}</td>
+        <td style="font-size:11px;color:var(--t3)">${new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
+        <td>${o.cj_order_id ? `<button class="btn btn-o" style="font-size:11px;padding:4px 10px" onclick="syncOrder(${o.id})">↻ Sync</button>` : ''}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) { console.error(e); }
+}
+
+async function syncOrder(id) {
+  try {
+    const r = await fetch(`${API}/dropshipping/orders/${id}/sync`, { method: 'POST', headers: authHeaders() });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    alert(`✅ Statut : ${d.status}${d.tracking_number ? '\nTracking : ' + d.tracking_number : ''}`);
+    await loadOrders();
+  } catch (e) {
+    alert('❌ ' + e.message);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

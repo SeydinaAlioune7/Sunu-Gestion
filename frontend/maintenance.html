@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance en cours — Sunu Gestion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif}.glass{background:rgba(15,23,42,.85);backdrop-filter:blur(12px)}</style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center relative overflow-hidden">
+    <!-- Décoration -->
+    <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="max-w-xl w-full mx-4 glass border border-slate-800 rounded-3xl p-10 text-center relative z-10 shadow-2xl">
+        <div class="w-20 h-20 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20 shadow-inner shadow-indigo-500/20">
+            <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-black text-white mb-4">Système en Maintenance</h1>
+        <p class="text-slate-400 text-lg mb-8" id="maintenanceMsg">Nous mettons actuellement à jour la plateforme pour vous offrir de nouvelles fonctionnalités. Merci de patienter quelques instants.</p>
+
+        <div class="inline-flex items-center gap-3 text-sm font-semibold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Vos données sont 100% sécurisées
+        </div>
+    </div>
+    
+    <script>
+        // Fetch custom message if available
+        fetch('/api/public/maintenance-status')
+            .then(r => r.json())
+            .then(data => {
+                if (data.active === false) window.location.href = '/';
+                if (data.message) document.getElementById('maintenanceMsg').innerText = data.message;
+            }).catch(e => console.log('Checking maintenance...'));
+            
+        // Auto-refresh pour voir si ça revient
+        setInterval(() => {
+            fetch('/api/public/maintenance-status')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.active === false) window.location.href = '/';
+                });
+        }, 15000);
+    </script>
+</body>
+</html>

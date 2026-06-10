@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "basic-ftp": "^6.0.1",
+    "localtunnel": "^2.0.2",
+    "node-ssh": "^13.2.1",
+    "playwright": "^1.60.0",
+    "ssh2": "^1.17.0"
+  }
+}
